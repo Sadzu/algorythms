@@ -1,0 +1,14 @@
+# ninja log v6
+253	297	1740406031526799897	untitled	687785bd178cc08c
+1	11	1740390509528829498	CMakeFiles/untitled.dir/sources/Node.cpp.o	7114253134f49422
+3	19	1740399820266661942	CMakeFiles/untitled.dir/sources/ListIterator.cpp.o	e17c0701c3bca03f
+3	273	1740399820266661942	CMakeFiles/untitled.dir/sources/OneLinkedList.cpp.o	2766f0dd399f078
+1	253	1740406031274802644	CMakeFiles/untitled.dir/sources/main.cpp.o	f54f1ffc55c58a5
+0	270	1740406110271949216	CMakeFiles/untitled.dir/sources/main.cpp.o	f54f1ffc55c58a5
+270	315	1740406110541946325	untitled	687785bd178cc08c
+1	260	1740406121285831415	CMakeFiles/untitled.dir/sources/main.cpp.o	f54f1ffc55c58a5
+261	306	1740406121545828637	untitled	687785bd178cc08c
+0	271	1740411355379978647	CMakeFiles/untitled.dir/sources/main.cpp.o	f54f1ffc55c58a5
+271	317	1740411355650973974	untitled	687785bd178cc08c
+1	297	1740411439629540079	CMakeFiles/untitled.dir/sources/main.cpp.o	f54f1ffc55c58a5
+297	342	1740411439925535072	untitled	687785bd178cc08c
