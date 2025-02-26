@@ -7,7 +7,7 @@ class ListIterator {
 private:
     Node<T> *_current;
 public:
-    ListIterator(Node<T> *node) {
+    explicit ListIterator(Node<T> *node) {
         _current = node;
     }
     ListIterator(const ListIterator<T> &other) {

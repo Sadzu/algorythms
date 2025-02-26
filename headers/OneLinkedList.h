@@ -19,6 +19,10 @@ public:
         _tail = nullptr;
     }
     OneLinkedList(OneLinkedList<T> &list) {
+        if (_head != nullptr) {
+            clear();
+        }
+        _size = 0;
         ListIterator<T> iterator = list.begin();
         do {
             pushBack((*iterator)->getData());
