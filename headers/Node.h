@@ -5,10 +5,10 @@
 template <typename T>
 class Node {
 private:
-    T _data;
     Node<T> *_next;
     size_t _id;
 public:
+    T _data;
     Node() {
         _data = nullptr;
         _next = nullptr;

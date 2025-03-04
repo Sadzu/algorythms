@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdexcept>
+
 #include "Node.h"
 
 template <typename T>
@@ -17,21 +19,27 @@ public:
         _current = nullptr;
     }
 
-    Node<T>* operator*() {
+    Node<T> getCurrent() {
         return _current;
     }
-    bool operator==(const ListIterator<T> &other) const {
+    T& operator*() {
+        if (_current == nullptr) {
+            throw std::runtime_error("Operator * to nullptr");
+        }
+        return _current->getData();
+    }
+    bool operator==(const ListIterator &other) const {
         return _current == other._current;
     }
-    bool operator!=(const ListIterator<T> &other) const {
+    bool operator!=(const ListIterator &other) const {
         return _current != other._current;
     }
-    ListIterator<T> operator++() {
+    ListIterator operator++() {
         _current = _current->getNext();
         return *this;
     }
-    ListIterator<T> operator++(int) {
-        ListIterator<T> tmp = *this;
+    ListIterator operator++(int) {
+        ListIterator tmp = *this;
         _current = _current->getNext();
         return tmp;
     }
