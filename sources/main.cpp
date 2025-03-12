@@ -11,29 +11,28 @@ int main() {
     OneLinkedList<int>::ListIterator iterator = list.begin();
     OneLinkedList<int>::ListIterator iter2 = list2.begin();
     while (true) {
-        std::cout << "1 - Copy list\n";
-        std::cout << "2 - Print list size\n";
-        std::cout << "3 - Clear list\n";
-        std::cout << "4 - Check list on isEmpty\n";
-        std::cout << "5 - Check list in contains\n";
-        std::cout << "6 - Print element by id\n";
-        std::cout << "7 - Change element by id\n";
-        std::cout << "8 - Get id by value\n";
-        std::cout << "9 - Push back new element\n";
-        std::cout << "10 - Push front new element\n";
-        std::cout << "11 - Push element to position\n";
-        std::cout << "12 - Delete by value\n";
-        std::cout << "13 - Delete by id\n";
-        std::cout << "14 - Pop back\n";
-        std::cout << "15 - Pop front\n";
-        std::cout << "16 - Get begin\n";
-        std::cout << "17 - Get end\n";
-        std::cout << "18 - Print list\n";
-        std::cout << "19 - Begin read\n";
-        std::cout << "20 - Begin write\n";
-        std::cout << "21 - Begin++\n";
-        std::cout << "22 - == with begin\n";
-        std::cout << "23 - != with begin\n";
+        std::cout << "1 - Print list size\n";
+        std::cout << "2 - Clear list\n";
+        std::cout << "3 - Check list on isEmpty\n";
+        std::cout << "4 - Check list in contains\n";
+        std::cout << "5 - Print element by id\n";
+        std::cout << "6 - Change element by id\n";
+        std::cout << "7 - Get id by value\n";
+        std::cout << "8 - Push back new element\n";
+        std::cout << "9 - Push front new element\n";
+        std::cout << "10 - Push element to position\n";
+        std::cout << "11 - Delete by value\n";
+        std::cout << "12 - Delete by id\n";
+        std::cout << "13 - Pop back\n";
+        std::cout << "14 - Pop front\n";
+        std::cout << "15 - Get begin\n";
+        std::cout << "16 - Get end\n";
+        std::cout << "17 - Print list\n";
+        std::cout << "18 - Begin read\n";
+        std::cout << "19 - Begin write\n";
+        std::cout << "20 - Begin++\n";
+        std::cout << "21 - == with begin\n";
+        std::cout << "22 - != with begin\n";
         std::cout << "0 - Exit\n";
         std::cout << "Enter the operation's number: ";
         std::cin >> code;
@@ -44,32 +43,26 @@ int main() {
             default:
                 break;
             case 1:
-                list2 = OneLinkedList<int>(list);
-            std::cout << "----------------------------------------------\n";
-                list2.print();
-            std::cout << "----------------------------------------------\n";
-                break;
-            case 2:
                 std::cout << "----------------------------------------------\n";
                 std::cout << list.getSize() << std::endl;
             std::cout << "----------------------------------------------\n";
                 break;
-            case 3:
+            case 2:
                 list.clear();
                 break;
-            case 4:
+            case 3:
                 std::cout << "----------------------------------------------\n";
                 std::cout << list.isEmpty() << std::endl;
             std::cout << "----------------------------------------------\n";
                 break;
-            case 5:
+            case 4:
                 std::cout << "Enter element: ";
                 std::cin >> data;
             std::cout << "----------------------------------------------\n";
                 std::cout << list.contains(data) << std::endl;
             std::cout << "----------------------------------------------\n";
                 break;
-            case 6:
+            case 5:
                 std::cout << "Enter id: ";
                 std::cin >> id;
             std::cout << "----------------------------------------------\n";
@@ -80,32 +73,32 @@ int main() {
                 }
             std::cout << "----------------------------------------------\n";
                 break;
-            case 7:
+            case 6:
                 std::cout << "Enter id: ";
                 std::cin >> id;
                 std::cout << "Enter value: ";
                 std::cin >> data;
                 std::cout << list.changeById(id, data) << std::endl;
                 break;
-            case 8:
+            case 7:
                 std::cout << "Enter value: ";
                 std::cin >> data;
             std::cout << "----------------------------------------------\n";
                 std::cout << list.getId(data) << std::endl;
             std::cout << "----------------------------------------------\n";
                 break;
-            case 9:
+            case 8:
                 std::cout << "Enter value: ";
                 std::cin >> data;
                 list.pushBack(data);
                 iterator = list.begin();
                 break;
-            case 10:
+            case 9:
                 std::cout << "Enter value: ";
                 std::cin >> data;
                 list.pushFront(data);
                 break;
-            case 11:
+            case 10:
                 std::cout << "Enter value: ";
                 std::cin >> data;
                 std::cout << "Enter position: ";
@@ -116,7 +109,7 @@ int main() {
                     std::cout << e.what() << std::endl;
                 }
                 break;
-            case 12:
+            case 11:
                 std::cout << "Enter value: ";
                 std::cin >> data;
                 try {
@@ -125,7 +118,7 @@ int main() {
                     std::cout << e.what() << std::endl;
                 }
                 break;
-            case 13:
+            case 12:
                 std::cout << "Enter id: ";
                 std::cin >> id;
                 try {
@@ -134,28 +127,24 @@ int main() {
                     std::cout << e.what() << std::endl;
                 }
                 break;
-            case 14:
+            case 13:
                 list.popBack();
                 break;
-            case 15:
+            case 14:
                 list.popFront();
                 break;
+            case 15:
+                iterator = list.begin();
+                break;
             case 16:
-                std::cout << "----------------------------------------------\n";
-                std::cout << list.begin().getCurrent()->getData() << std::endl;
-            std::cout << "----------------------------------------------\n";
+                iterator = list.end();
                 break;
             case 17:
-                std::cout << "----------------------------------------------\n";
-                std::cout << list.tail().getCurrent()->getData() << std::endl;
-            std::cout << "----------------------------------------------\n";
-                break;
-            case 18:
                 std::cout << "----------------------------------------------\n";
                 list.print();
             std::cout << "----------------------------------------------\n";
                 break;
-            case 19:
+            case 18:
                 std::cout << "----------------------------------------------\n";
                 try {
                     std::cout << *iterator << std::endl;
@@ -164,7 +153,7 @@ int main() {
                 }
             std::cout << "----------------------------------------------\n";
                 break;
-            case 20:
+            case 19:
                 std::cout << "Enter value: ";
                 try {
                     std::cin >> *iterator;
@@ -172,15 +161,15 @@ int main() {
                     std::cout << er.what() << std::endl;
                 }
                 break;
-            case 21:
+            case 20:
                 iterator++;
-            case 22:
+            case 21:
                 iter2 = list.begin();
             std::cout << "----------------------------------------------\n";
                 std::cout << (iter2 == iterator) << std::endl;
             std::cout << "----------------------------------------------\n";
                 break;
-            case 23:
+            case 22:
                 iter2 = list.begin();
             std::cout << "----------------------------------------------\n";
                 std::cout << (iter2 != iterator) << std::endl;
