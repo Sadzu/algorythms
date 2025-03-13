@@ -1,3 +1,3 @@
-/home/sadzumo/CLionProjects/untitled/cmake-build-debug/CMakeFiles/untitled.dir
-/home/sadzumo/CLionProjects/untitled/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/sadzumo/CLionProjects/untitled/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/sadzumo/CLionProjects/algorythms/cmake-build-debug/CMakeFiles/untitled.dir
+/home/sadzumo/CLionProjects/algorythms/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/sadzumo/CLionProjects/algorythms/cmake-build-debug/CMakeFiles/rebuild_cache.dir

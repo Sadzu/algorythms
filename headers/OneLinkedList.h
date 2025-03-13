@@ -31,7 +31,7 @@ public:
         }
         T& operator*() {
             if (_current == nullptr) {
-                throw std::runtime_error("Operator * to nullptr");
+                throw std::runtime_error("Exception: Operator * to nullptr");
             }
             T& n = _current->_data;
             return n;
@@ -113,7 +113,7 @@ public:
     }
     T getById(size_t id) {
         if (id >= _size) {
-            throw std::out_of_range("Index is out of range");
+            throw std::out_of_range("Exception: Index is out of range");
         }
         ListIterator iterator = begin();
         while (id != iterator.getCurrent()->getId()) {
@@ -145,12 +145,15 @@ public:
 
         return -1;
     }
-    void addToPosition(size_t id, T data) {
-        if (id >= _size) {
-            throw std::out_of_range("Index is out of range");
-            return;
+    bool addToPosition(size_t id, T data) {
+        if (id > _size) {
+            return false;
         } else if (id == 0) {
             pushFront(data);
+            return true;
+        } else if (id == _size) {
+            pushBack(data);
+            return true;
         }
         ListIterator iterator = begin();
         while (id != iterator.getCurrent()->getId()) {
@@ -167,19 +170,19 @@ public:
             iterator.getCurrent()->setId(iterator.getCurrent()->getId() + 1);
         } while (iterator != tail());
         _size++;
+        return true;
     }
-    void removeFromPosition(size_t id) {
+    bool removeFromPosition(size_t id) {
         if (id >= _size) {
-            throw std::out_of_range("Index is out of range");
-            return;
+            return false;
         }
         if (id == _size - 1) {
             popBack();
-            return;
+            return true;
         }
         if (id == 0) {
             popFront();
-            return;
+            return true;
         }
         ListIterator iterator = begin();
         while (id != iterator.getCurrent()->getId()) {
@@ -196,8 +199,9 @@ public:
             iterator.getCurrent()->setId(iterator.getCurrent()->getId() - 1);
             ++iterator;
         } while (++tail() != iterator);
+        return true;
     }
-    void removeByValue(T data) {
+    bool removeByValue(T data) {
         bool flag = false;
         ListIterator iterator = begin();
         do {
@@ -208,15 +212,15 @@ public:
             ++iterator;
         } while (iterator != ++tail());
         if (!flag) {
-            throw std::invalid_argument("Data not found");
+            return false;
         }
         if (iterator.getCurrent()->getId() == 0) {
             popFront();
-            return;
+            return true;
         }
         if (iterator.getCurrent()->getId() == _size - 1) {
             popBack();
-            return;
+            return true;
         }
         Node<T> *temp = iterator.getCurrent();
         (--iterator).getCurrent()->setNext(temp->getNext());
@@ -228,6 +232,7 @@ public:
             iterator.getCurrent()->setId(iterator.getCurrent()->getId() - 1);
             ++iterator;
         } while (++tail() != iterator);
+        return true;
     }
     ListIterator begin() {
         return ListIterator(_head);
@@ -238,7 +243,7 @@ public:
     ListIterator end() {
         return ListIterator(nullptr);
     }
-    void pushBack(T data) {
+    bool pushBack(T data) {
         Node<T> *temp = new Node<T>(data);
         if (isEmpty()) {
             _head = temp;
@@ -246,7 +251,7 @@ public:
             _tail = _head;
             _head->setId(0);
             _size++;
-            return;
+            return true;
         }
 
         _tail->setNext(temp);
@@ -255,8 +260,9 @@ public:
         _tail->setId(new_id);
         _size++;
         _tail->setNext(_head);
+        return true;
     }
-    void pushFront(T data) {
+    bool pushFront(T data) {
         Node<T> *temp = new Node<T>(data);
         if (isEmpty()) {
             _head = temp;
@@ -264,7 +270,7 @@ public:
             _size++;
             _head->setNext(_head);
             _tail = _head;
-            return;
+            return true;
         }
 
         temp->setNext(_head);
@@ -276,16 +282,17 @@ public:
             iterator.getCurrent()->setId(iterator.getCurrent()->getId() + 1);
         } while (iterator != tail());
         _size++;
+        return true;
     }
-    void popBack() {
+    bool popBack() {
         if (_tail == nullptr) {
-            return;
+            return false;
         }
         if (_tail == _head) {
             delete _head;
             _head = _tail = nullptr;
             _size = 0;
-            return;
+            return true;
         }
         Node<T> *temp = _tail;
         ListIterator iterator = tail();
@@ -293,16 +300,17 @@ public:
         _tail->setNext(_head);
         delete temp;
         --_size;
+        return true;
     }
-    void popFront() {
+    bool popFront() {
         if (_head == nullptr) {
-            return;
+            return false;
         }
         if (_head == _tail) {
             delete _tail;
             _head = _tail = nullptr;
             _size = 0;
-            return;
+            return true;
         }
         Node<T> *temp = _head;
         _head = _head->getNext();
@@ -314,6 +322,7 @@ public:
             ++iterator;
         } while (iterator != ++tail());
         --_size;
+        return true;
     }
     void print() {
         if (_size == 0) {
