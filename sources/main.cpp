@@ -58,21 +58,32 @@ int main() {
             case 4:
                 std::cout << "Enter a key: ";
                 std::cin >> key;
-                std::cout << "------------------\n";
-                std::cout << tree[key] << std::endl;
-                std::cout << "------------------\n";
+                try {
+                    std::cout << "------------------\n";
+                    std::cout << tree[key] << std::endl;
+                    std::cout << "------------------\n";
+                } catch (const std::runtime_error& e) {
+                    std::cout << "Exception: " << e.what() << std::endl;
+                }
                 break;
             case 5:
+                std::cout << "Enter a key: ";
+                std::cin >> key;
                 std::cout << "Enter a value: ";
-                std::cin >> value;
-                std::cin >> tree[value];
+                try {
+                    std::cin >> tree[key];
+                } catch (std::runtime_error& e) {
+                    std::cout << "Exception: " << e.what() << std::endl;
+                }
                 break;
             case 6:
                 std::cout << "Enter a key: ";
                 std::cin >> key;
                 std::cout << "Enter a value: ";
                 std::cin >> value;
-                tree.insert(key, value);
+                std::cout << "------------------\n";
+                std::cout << tree.insert(key, value) << '\n';
+                std::cout << "------------------\n";
                 break;
             case 7:
                 std::cout << "Enter a key: ";
@@ -93,7 +104,7 @@ int main() {
                 std::cout << "Enter a key: ";
                 std::cin >> key;
                 std::cout << "------------------\n";
-                std::cout << tree.countGreaterThan(key);
+                std::cout << tree.countGreaterThan(key) << '\n';
                 std::cout << "------------------\n";
                 break;
             case 10:

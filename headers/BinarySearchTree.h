@@ -325,7 +325,7 @@ public:
         throw std::runtime_error("Key not found");
     }
 
-    void insert(const Key& key, const Data& data) {
+    bool insert(const Key& key, const Data& data) {
         Node* newNode = new Node(key, data);
         if (!root) {
             root = newNode;
@@ -336,8 +336,10 @@ public:
                 parent = current;
                 if (key < current->key) {
                     current = current->left;
-                } else {
+                } else if (key > current->key) {
                     current = current->right;
+                } else {
+                    return false;
                 }
             }
             newNode->parent = parent;
@@ -348,6 +350,8 @@ public:
             }
         }
         ++size;
+
+        return true;
     }
 
     bool remove(const Key& key) {
