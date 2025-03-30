@@ -1,11 +1,13 @@
 #include "../headers/BinarySearchTree.h"
+#include "../headers/bst_tests.h"
 
 int main() {
     BinarySearchTree<int, int> tree = BinarySearchTree<int, int>();
     int key = 0, value = 0;
     int operation = 0;
-    BinarySearchTree<int, int>::Iterator it;
-    BinarySearchTree<int, int>::ReverseIterator rIt;
+    int nForTests = 0;
+    BinarySearchTree<int, int>::iterator it = tree.begin();
+    BinarySearchTree<int, int>::reverse_iterator rIt = tree.rbegin();
     bool compare;
     while (true) {
         std::cout << "1 - Print tree size\n";
@@ -35,6 +37,8 @@ int main() {
         std::cout << "25 - rIterator!=rbegin\n";
         std::cout << "26 - Print tree\n";
         std::cout << "27 - Get nodes visited\n";
+        std::cout << "28 - Test rand\n";
+        std::cout << "29 - Test ord\n";
         std::cout << "Enter a number (0 to terminate): ";
         std::cin >> operation;
         switch (operation) {
@@ -126,7 +130,6 @@ int main() {
                 break;
             case 15:
                 std::cout << "Enter a value: ";
-                std::cin >> value;
                 std::cin >> *it;
                 break;
             case 16:
@@ -142,7 +145,6 @@ int main() {
                 break;
             case 19:
                 std::cout << "Enter a value: ";
-                std::cin >> value;
                 std::cin >> *rIt;
                 break;
             case 20:
@@ -183,6 +185,20 @@ int main() {
                 std::cout << "------------------\n";
                 std::cout << tree.getNodesVisited() << std::endl;
                 std::cout << "------------------\n";
+                break;
+            case 28:
+                std::cout << "Enter n: ";
+                std::cin >> nForTests;
+                std::cout << "--------------\n";
+                test_rand(nForTests);
+                std::cout << "---------------\n";
+                break;
+            case 29:
+                std::cout << "Enter n: ";
+                std::cin >> nForTests;
+                std::cout << "---------------\n";
+                test_ord(nForTests);
+                std::cout << "---------------\n";
                 break;
         }
     }

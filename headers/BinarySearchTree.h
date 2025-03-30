@@ -1,8 +1,9 @@
+#pragma once
+
 #include <iostream>
 #include <vector>
 #include <stack>
 #include <stdexcept>
-#include <algorithm>
 
 template <typename Key, typename Data>
 class BinarySearchTree {
@@ -164,135 +165,136 @@ private:
     }
 
 public:
-    class Iterator {
-    protected:
+    class iterator {
+    private:
         Node* current;
-        std::stack<Node*> stack;
-        Node *_root;
-
-        void pushLeft(Node* node) {
-            while (node) {
-                stack.push(node);
-                node = node->left;
-            }
-        }
+        BinarySearchTree* tree;
 
     public:
-        Iterator(Node* node = nullptr, Node *baseRoot = nullptr) : current(node), _root(baseRoot) {
-            if (current) pushLeft(current);
-        }
+        iterator(Node* node, BinarySearchTree* tree_ptr) : current(node), tree(tree_ptr) {}
 
-        Data& operator*() {
-            if (current) return current->data;
-            throw std::runtime_error("Dereference of end iterator");
-        }
+        iterator& operator++() {
+            if (!current) return *this;
 
-        Iterator& operator++() {
-            if (stack.empty()) {
-                current = nullptr;
-                return *this;
-            }
-            current = stack.top();
-            stack.pop();
-            if (current->right) pushLeft(current->right);
+            Node* next_node = findNext(current);
+            current = next_node;
             return *this;
         }
 
-        Iterator operator++(int) {
-            Iterator temp = *this;
+        iterator operator++(int) {
+            iterator temp = *this;
             ++(*this);
             return temp;
         }
 
-        Iterator& operator--() {
-            if (!current) {
-                current = findMax(_root);
-                pushLeft(current);
+        iterator& operator--() {
+            if (!current) { // Special case: if already at end(), go to last element
+                current = tree->findMax(tree->root);
                 return *this;
             }
-            current = findPrevious(current);
+
+            Node* prev_node = findPrevious(current);
+            current = prev_node;
             return *this;
         }
 
-        Iterator operator--(int) {
-            Iterator temp = *this;
+        iterator operator--(int) {
+            iterator temp = *this;
             --(*this);
             return temp;
         }
 
-        bool operator==(const Iterator& other) const {
+        bool operator==(const iterator& other) const {
             return current == other.current;
         }
 
-        bool operator!=(const Iterator& other) const {
+        bool operator!=(const iterator& other) const {
             return !(*this == other);
-        }
-    };
-
-    class ReverseIterator {
-    protected:
-        Node* current;
-        std::stack<Node*> stack;
-        Node *_root;
-
-        void pushRight(Node* node) {
-            while (node) {
-                stack.push(node);
-                node = node->right;
-            }
-        }
-
-    public:
-        ReverseIterator(Node* node = nullptr, Node *baseRoot = nullptr) : current(node), _root(baseRoot) {
-            if (current) pushRight(current);
         }
 
         Data& operator*() {
-            if (current) return current->data;
-            throw std::runtime_error("Dereference of end iterator");
-        }
+            return current->data;        }
 
-        ReverseIterator& operator++() {
-            if (stack.empty()) {
-                current = nullptr;
-                return *this;
-            }
-            current = stack.top();
-            stack.pop();
-            if (current->left) pushRight(current->left);
+        std::pair<const Key&, Data&> operator->() {
+            return std::make_pair(current->key, current->data);
+        }
+    };
+
+
+    // Reverse Iterator
+    class reverse_iterator {
+    private:
+        Node* current;
+        BinarySearchTree* tree;
+
+    public:
+        reverse_iterator(Node* node, BinarySearchTree* tree_ptr) : current(node), tree(tree_ptr) {}
+
+        reverse_iterator& operator++() {  // Note: ++ goes *backwards* for reverse iterator
+           if (!current) return *this;
+
+            Node* prev_node = findPrevious(current); // findPrevious still goes to the *logical* previous, even in reverse
+            current = prev_node;
             return *this;
         }
 
-        ReverseIterator operator++(int) {
-            ReverseIterator temp = *this;
+        reverse_iterator operator++(int) {
+            reverse_iterator temp = *this;
             ++(*this);
             return temp;
         }
 
-        ReverseIterator& operator--() {
-            if (!current) {
-                current = findMin(_root);
-                pushRight(current);
+        reverse_iterator& operator--() {  // Decrement goes forward in the *logical* sense for reverse iterators
+            if (!current) { // Special case: if already at rend(), go to last element
+                current = tree->findMin(tree->root);
                 return *this;
             }
-            current = findNext(current);
+
+            Node* next_node = findNext(current); // findNext still goes to the *logical* next, even in reverse
+            current = next_node;
             return *this;
         }
 
-        ReverseIterator operator--(int) {
-            ReverseIterator temp = *this;
+
+        reverse_iterator operator--(int) {
+            reverse_iterator temp = *this;
             --(*this);
             return temp;
         }
 
-        bool operator==(const ReverseIterator& other) const {
+        bool operator==(const reverse_iterator& other) const {
             return current == other.current;
         }
 
-        bool operator!=(const ReverseIterator& other) const {
+        bool operator!=(const reverse_iterator& other) const {
             return !(*this == other);
         }
+
+        Data& operator*() {
+            return current->data;
+        }
+
+        std::pair<const Key&, Data&> operator->() {
+            return std::make_pair(current->key, current->data);
+        }
     };
+
+    // Iterator Begin/End methods
+    iterator begin() {
+        return iterator(findMin(root), this);
+    }
+
+    iterator end() {
+        return iterator(nullptr, this);  // End iterator points to nullptr
+    }
+
+    reverse_iterator rbegin() {
+        return reverse_iterator(findMax(root), this);
+    }
+
+    reverse_iterator rend() {
+        return reverse_iterator(nullptr, this); // End iterator points to nullptr
+    }
 
     BinarySearchTree() : root(nullptr), size(0), nodesVisited(0) {}
 
@@ -368,22 +370,6 @@ public:
         std::vector<Key> keys;
         inOrderTraversal(root, keys);
         return keys;
-    }
-
-    Iterator begin() const {
-        return Iterator(findMin(root), root);
-    }
-
-    Iterator end() const {
-        return Iterator();
-    }
-
-    ReverseIterator rbegin() const {
-        return ReverseIterator(findMax(root), root);
-    }
-
-    ReverseIterator rend() const {
-        return ReverseIterator();
     }
 
     void print() const {

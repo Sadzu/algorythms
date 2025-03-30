@@ -5,4 +5,5 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_executable(untitled sources/main.cpp
         headers/Btree.h
-        headers/BinarySearchTree.h)
+        headers/BinarySearchTree.h
+        headers/bst_tests.h)
