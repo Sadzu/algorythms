@@ -125,12 +125,20 @@ int main() {
                 break;
             case 14:
                 std::cout << "------------------\n";
-                std::cout << *it << std::endl;
+                try {
+                    std::cout << *it << std::endl;
+                } catch (std::runtime_error& e) {
+                    std::cout << "Exception: " << e.what() << std::endl;
+                }
                 std::cout << "------------------\n";
                 break;
             case 15:
                 std::cout << "Enter a value: ";
-                std::cin >> *it;
+                try {
+                    std::cin >> *it;
+                } catch (std::runtime_error& e) {
+                    std::cout << "Exception: " << e.what() << std::endl;
+                }
                 break;
             case 16:
                 ++it;
@@ -140,12 +148,20 @@ int main() {
                 break;
             case 18:
                 std::cout << "------------------\n";
-                std::cout << *rIt << std::endl;
+                try {
+                    std::cout << *rIt << std::endl;
+                } catch (std::runtime_error& e) {
+                    std::cout << "Exception: " << e.what() << std::endl;
+                }
                 std::cout << "------------------\n";
                 break;
             case 19:
                 std::cout << "Enter a value: ";
-                std::cin >> *rIt;
+                try {
+                    std::cin >> *rIt;
+                } catch (std::runtime_error& e) {
+                    std::cout << "Exception: " << e.what() << std::endl;
+                }
                 break;
             case 20:
                 ++rIt;

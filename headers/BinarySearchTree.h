@@ -55,8 +55,10 @@ private:
         return nullptr;
     }
 
-    static Node* findMin(Node* node) {
+    static Node* findMin(Node* node, size_t& copyNodesVisited) {
+        //copyNodesVisited = 0;
         while (node && node->left) {
+            ++copyNodesVisited;
             node = node->left;
         }
         return node;
@@ -71,8 +73,8 @@ private:
 
     void inOrderTraversal(Node* node, std::vector<Key>& keys) const {
         if (node) {
-            inOrderTraversal(node->left, keys);
             keys.push_back(node->key);
+            inOrderTraversal(node->left, keys);
             inOrderTraversal(node->right, keys);
         }
     }
@@ -82,11 +84,14 @@ private:
             root = v;
         } else if (u == u->parent->left) {
             u->parent->left = v;
+            nodesVisited++;
         } else {
             u->parent->right = v;
+            nodesVisited++;
         }
         if (v) {
             v->parent = u->parent;
+            nodesVisited++;
         }
     }
 
@@ -96,15 +101,19 @@ private:
         } else if (!node->right) {
             transplant(node, node->left);
         } else {
-            Node* y = findMin(node->right);
+            Node* y = findMin(node->right, nodesVisited);
             if (y->parent != node) {
                 transplant(y, y->right);
                 y->right = node->right;
+                nodesVisited++;
                 y->right->parent = y;
+                nodesVisited++;
             }
             transplant(node, y);
             y->left = node->left;
+            nodesVisited++;
             y->left->parent = y;
+            nodesVisited++;
         }
         delete node;
         --size;
@@ -154,7 +163,8 @@ private:
 
     static Node* findNext(Node* node) {
         if (node->right) {
-            return findMin(node->right);
+            size_t a = 0;
+            return findMin(node->right, a);
         }
         Node* parent = node->parent;
         while (parent && node == parent->right) {
@@ -213,7 +223,11 @@ public:
         }
 
         Data& operator*() {
-            return current->data;        }
+            if (current == nullptr) {
+                throw std::runtime_error("Dereference of end() iterator");
+            }
+            return current->data;
+        }
 
         std::pair<const Key&, Data&> operator->() {
             return std::make_pair(current->key, current->data);
@@ -246,7 +260,8 @@ public:
 
         reverse_iterator& operator--() {  // Decrement goes forward in the *logical* sense for reverse iterators
             if (!current) { // Special case: if already at rend(), go to last element
-                current = tree->findMin(tree->root);
+                size_t a = 0;
+                current = tree->findMin(tree->root, a);
                 return *this;
             }
 
@@ -271,6 +286,9 @@ public:
         }
 
         Data& operator*() {
+            if (current == nullptr) {
+                throw std::runtime_error("Dereference of end() iterator");
+            }
             return current->data;
         }
 
@@ -281,7 +299,8 @@ public:
 
     // Iterator Begin/End methods
     iterator begin() {
-        return iterator(findMin(root), this);
+        size_t a = 0;
+        return iterator(findMin(root, a), this);
     }
 
     iterator end() {
@@ -296,11 +315,14 @@ public:
         return reverse_iterator(nullptr, this); // End iterator points to nullptr
     }
 
-    BinarySearchTree() : root(nullptr), size(0), nodesVisited(0) {}
+    BinarySearchTree() : root(nullptr), size(0) {
+        nodesVisited = 0;
+    }
 
-    BinarySearchTree(const BinarySearchTree& other) : root(nullptr), size(0), nodesVisited(0) {
+    BinarySearchTree(const BinarySearchTree& other) : root(nullptr), size(0) {
         root = copyTree(other.root);
         size = other.size;
+        nodesVisited = 0;
     }
 
     ~BinarySearchTree() {
@@ -328,6 +350,7 @@ public:
     }
 
     bool insert(const Key& key, const Data& data) {
+        nodesVisited = 0;
         Node* newNode = new Node(key, data);
         if (!root) {
             root = newNode;
@@ -338,8 +361,10 @@ public:
                 parent = current;
                 if (key < current->key) {
                     current = current->left;
+                    nodesVisited++;
                 } else if (key > current->key) {
                     current = current->right;
+                    nodesVisited++;
                 } else {
                     return false;
                 }
