@@ -4,6 +4,7 @@
 #include <math.h>
 #include <iostream>
 #include "BinarySearchTree.h"
+#include "RandomizedBinarySearchTree.h"
 
 using namespace std;
 typedef unsigned long long INT_64;
@@ -33,7 +34,7 @@ INT_64 LineRand() {
 
 void test_rand(int n) {
     //создание дерева для 64 – разрядных ключей типа INT_64
-    BinarySearchTree<INT_64, int> tree;
+    RandomizedBinarySearchTree<INT_64, int> tree;
     //массив для ключей, которые присутствуют в дереве
     INT_64 *m = new INT_64 [n];
     //установка первого случайного числа
@@ -92,7 +93,7 @@ void test_rand(int n) {
 
 void test_ord(int n) {
     //создание дерева для 64 – разрядных ключей типа INT_64
-    BinarySearchTree<INT_64, int> tree;
+    RandomizedBinarySearchTree<INT_64, int> tree;
     //массив для ключей, которые присутствуют в дереве
     INT_64 *m = new INT_64 [n];
     //заполнение дерева и массива элементами с возрастающими чётными

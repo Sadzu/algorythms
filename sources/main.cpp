@@ -1,13 +1,14 @@
 #include "../headers/BinarySearchTree.h"
 #include "../headers/bst_tests.h"
+#include "../headers/RandomizedBinarySearchTree.h"
 
 int main() {
-    BinarySearchTree<int, int> tree = BinarySearchTree<int, int>();
+    RandomizedBinarySearchTree<int, int> tree = RandomizedBinarySearchTree<int, int>();
     int key = 0, value = 0;
     int operation = 0;
     int nForTests = 0;
-    BinarySearchTree<int, int>::iterator it = tree.begin();
-    BinarySearchTree<int, int>::reverse_iterator rIt = tree.rbegin();
+    RandomizedBinarySearchTree<int, int>::iterator it = tree.begin();
+    RandomizedBinarySearchTree<int, int>::reverse_iterator rIt = tree.rbegin();
     bool compare;
     while (true) {
         std::cout << "1 - Print tree size\n";

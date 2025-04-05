@@ -7,7 +7,7 @@
 
 template <typename Key, typename Data>
 class BinarySearchTree {
-private:
+protected: // Изменено на protected
     struct Node {
         Key key;
         Data data;
@@ -19,10 +19,24 @@ private:
             : key(k), data(d), left(nullptr), right(nullptr), parent(p) {}
     };
 
+protected: // root теперь protected
     Node* root;
     size_t size;
     mutable size_t nodesVisited;
 
+    // Protected accessors for Node members
+    Node* getLeft(Node* node) const { return node ? node->left : nullptr; }
+    Node* getRight(Node* node) const { return node ? node->right : nullptr; }
+    Node* getParent(Node* node) const { return node ? node->parent : nullptr; }
+    Key getKey(Node* node) const { return node->key; }
+    Data& getData(Node* node) const { return node->data; }
+    void setLeft(Node* node, Node* left) { if (node) node->left = left; }
+    void setRight(Node* node, Node* right) { if (node) node->right = right; }
+    void setParent(Node* node, Node* parent) { if (node) node->parent = parent; }
+    Node* getRoot() const { return root; }
+    void setRoot(Node *newRoot){root = newRoot;}
+
+private:
     void destroyTree(Node* node) {
         if (node) {
             destroyTree(node->left);
@@ -297,7 +311,6 @@ public:
         }
     };
 
-    // Iterator Begin/End methods
     iterator begin() {
         size_t a = 0;
         return iterator(findMin(root, a), this);
@@ -408,4 +421,5 @@ public:
     size_t countGreaterThan(const Key& key) const {
         return countNodesGreaterThan(key);
     }
+
 };
