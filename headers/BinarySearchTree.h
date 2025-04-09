@@ -422,4 +422,8 @@ public:
         return countNodesGreaterThan(key);
     }
 
+    bool contains(const Key& key) const {
+        Node* node = findNode(key);
+        return node != nullptr;
+    }
 };

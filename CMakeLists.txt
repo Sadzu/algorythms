@@ -7,4 +7,5 @@ add_executable(untitled sources/main.cpp
         headers/Btree.h
         headers/BinarySearchTree.h
         headers/bst_tests.h
-        headers/RandomizedBinarySearchTree.h)
+        headers/RandomizedBinarySearchTree.h
+        headers/RandomBstTests.h)

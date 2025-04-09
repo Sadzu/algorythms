@@ -1,240 +1,314 @@
 #pragma once
-#include <random> // Для std::random_device и std::mt19937
-#include <iostream> // Для std::cout и std::endl
+
 #include "BinarySearchTree.h"
+#include <random>
+#include <queue> // Для вывода дерева
+#include <stack>
 
 template <typename Key, typename Data>
 class RandomizedBinarySearchTree : public BinarySearchTree<Key, Data> {
 private:
-    // Random number generation
     std::random_device rd;
     std::mt19937 gen;
     std::uniform_real_distribution<> dis;
 
-    // Helper function to rotate right (iterative)
-    typename BinarySearchTree<Key,Data>::Node* rotateRight(typename BinarySearchTree<Key,Data>::Node* y) {
-        typename BinarySearchTree<Key,Data>::Node* x = this->getLeft(y);
-        typename BinarySearchTree<Key,Data>::Node* T2 = this->getRight(x);
+    struct JoinResult {
+        typename BinarySearchTree<Key, Data>::Node* root;
+    };
 
-        // Perform rotation
-        this->setRight(x, y);
-        this->setLeft(y, T2);
-
-        // Update parents
-        if (T2) this->setParent(T2, y);
-        this->setParent(x, this->getParent(y));
-        this->setParent(y, x);
-        typename BinarySearchTree<Key,Data>::Node* grandParent = this->getParent(x);
-        if (grandParent) {
-            if (y == this->getLeft(grandParent))
-                this->setLeft(grandParent, x);
-            else
-                this->setRight(grandParent, x);
-        } else {
-            this->setRoot(x); // x is the new root
+    // RND_Join (a, b)
+    JoinResult RND_Join(typename BinarySearchTree<Key, Data>::Node* a, typename BinarySearchTree<Key, Data>::Node* b) {
+        JoinResult result;
+        if (a == nullptr) {
+            result.root = b;
+            return result;
         }
+        if (b == nullptr) {
+            result.root = a;
+            return result;
+        }
+
+        // Используем размер поддерева, если он доступен. Иначе считаем за 1.
+        size_t size_a = (a) ? countNodes(a) : 1;
+        size_t size_b = (b) ? countNodes(b) : 1;
+        this->nodesVisited+=2;
+
+        if (dis(gen) < (double)size_a / (size_a + size_b)) {
+            JoinResult joinResult = RND_Join(a->right, b);
+            a->right = joinResult.root;
+            if (a->right) {
+                a->right->parent = a;
+                this->nodesVisited++;
+            }
+            result.root = a;
+            return result;
+        } else {
+            JoinResult joinResult = RND_Join(a, b->left);
+            b->left = joinResult.root;
+            if (b->left) {
+                b->left->parent = b;
+                 this->nodesVisited++;
+            }
+            result.root = b;
+            return result;
+        }
+    }
+
+    size_t countNodes(typename BinarySearchTree<Key,Data>::Node* node){
+        if (!node) return 0;
+        return 1 + countNodes(node->left) + countNodes(node->right);
+    }
+
+    // RND_Delete (t, k, deleted) - Iterative
+    typename BinarySearchTree<Key, Data>::Node* RND_Delete(typename BinarySearchTree<Key, Data>::Node* root, const Key& k, bool& deleted) {
+        typename BinarySearchTree<Key, Data>::Node* current = root;
+        typename BinarySearchTree<Key, Data>::Node* parent = nullptr;
+        this->nodesVisited = 0; // Сброс счетчика посещенных узлов
+
+        // Поиск удаляемого узла
+        while (current != nullptr && current->key != k) {
+            this->nodesVisited++;
+            parent = current;
+            if (k < current->key) {
+                current = current->left;
+            } else {
+                current = current->right;
+            }
+        }
+
+        // Если узел не найден
+        if (current == nullptr) {
+            deleted = false;
+            return root;
+        }
+
+        // Узел найден
+        typename BinarySearchTree<Key, Data>::Node* replacement;
+
+        JoinResult joinResult = RND_Join(current->left, current->right);
+        replacement = joinResult.root;
+
+        // Замена узла в дереве
+        if (parent == nullptr) {
+            // Удаляем корень
+            root = replacement;
+        } else if (current == parent->left) {
+            parent->left = replacement;
+        } else {
+            parent->right = replacement;
+        }
+
+        if(replacement){
+            replacement->parent = parent;
+            this->nodesVisited++; // Учитываем посещение при обновлении родителя
+        }
+
+        delete current;
+        this->size--;
+        deleted = true;
+
+        return root;
+    }
+
+    // L(t) - Left Rotation
+    typename BinarySearchTree<Key, Data>::Node* L(typename BinarySearchTree<Key, Data>::Node* t) {
+        if (t == nullptr) {
+            return nullptr;
+        }
+        typename BinarySearchTree<Key, Data>::Node* x = t->right;
+        if (x == nullptr) return t;
+
+        t->right = x->left;
+        if (x->left != nullptr) {
+            x->left->parent = t;
+             this->nodesVisited++;
+        }
+        x->left = t;
+        x->parent = t->parent;
+        t->parent = x;
+         this->nodesVisited+=4;
 
         return x;
     }
 
-    // Helper function to rotate left (iterative)
-    typename BinarySearchTree<Key,Data>::Node* rotateLeft(typename BinarySearchTree<Key,Data>::Node* x) {
-        typename BinarySearchTree<Key,Data>::Node* y = this->getRight(x);
-        typename BinarySearchTree<Key,Data>::Node* T2 = this->getLeft(y);
-
-        // Perform rotation
-        this->setLeft(y, x);
-        this->setRight(x, T2);
-
-        // Update parents
-        if (T2) this->setParent(T2, x);
-        this->setParent(y, this->getParent(x));
-        this->setParent(x, y);
-        typename BinarySearchTree<Key,Data>::Node* grandParent = this->getParent(y);
-        if (grandParent) {
-            if (x == this->getLeft(grandParent))
-                this->setLeft(grandParent, y);
-            else
-                this->setRight(grandParent, y);
-        } else {
-            this->setRoot(y); // y is the new root
+    // R(t) - Right Rotation
+    typename BinarySearchTree<Key, Data>::Node* R(typename BinarySearchTree<Key, Data>::Node* t) {
+        if (t == nullptr) {
+            return nullptr;
         }
-        return y;
-    }
+        typename BinarySearchTree<Key, Data>::Node* x = t->left;
+         if (x == nullptr) return t;
 
-    //Find the minimum node (iterative)
-    typename BinarySearchTree<Key,Data>::Node* findMin(typename BinarySearchTree<Key,Data>::Node* node) {
-        this->nodesVisited = 0;
-        while (node && this->getLeft(node)) {
-            ++this->nodesVisited;
-            node = this->getLeft(node);
+        t->left = x->right;
+        if (x->right != nullptr) {
+            x->right->parent = t;
+             this->nodesVisited++;
         }
-        return node;
+        x->right = t;
+        x->parent = t->parent;
+        t->parent = x;
+         this->nodesVisited+=4;
+
+        return x;
     }
 
-public:
-    // Constructor
-    RandomizedBinarySearchTree() : gen(rd()), dis(0.0, 1.0) {}
-
-    // Constructor (with seed for testing)
-    RandomizedBinarySearchTree(unsigned int seed) : gen(seed), dis(0.0, 1.0) {}
-
-    // Copy constructor
-    RandomizedBinarySearchTree(const RandomizedBinarySearchTree& other) : BinarySearchTree<Key, Data>(other) , gen(rd()), dis(0.0, 1.0) {}
-
-    // Assignment operator (optional, but good practice)
-    RandomizedBinarySearchTree& operator=(const RandomizedBinarySearchTree& other) {
-        if (this != &other) {
-            // Clear existing tree
-            clear();
-            // Copy from other
-            BinarySearchTree<Key, Data>::operator=(other); // Use base class assignment
-             gen = std::mt19937(rd()); // Re-seed random number generator to be different
-             dis = std::uniform_real_distribution<>(0.0, 1.0);
-        }
-        return *this;
-    }
-
-    // Destructor
-    ~RandomizedBinarySearchTree() {
-        clear(); // Use the inherited clear() method
-    }
-
-    // Size of the tree
-    size_t getSize() const {
-        return BinarySearchTree<Key, Data>::getSize();  // Access inherited size member
-    }
-
-    // Clear the tree
-    void clear() {
-        BinarySearchTree<Key, Data>::clear(); // Use inherited clear method
-    }
-
-    // Check if the tree is empty
-    bool isEmpty() const {
-        return BinarySearchTree<Key, Data>::isEmpty();
-    }
-
-    // Access data by key (read/write)
-    Data& operator[](const Key& key) {
-        try {
-            return BinarySearchTree<Key,Data>::operator[](key);
-        }
-        catch(const std::runtime_error&){
-            insert(key, Data()); // Default-constructed Data
-            return BinarySearchTree<Key,Data>::operator[](key);
+    // BST_Root_Insert(t, k, data, inserted) - Recursive
+    typename BinarySearchTree<Key, Data>::Node* BST_Root_Insert(typename BinarySearchTree<Key, Data>::Node* t, const Key& k, const Data& data, bool& inserted) {
+        this->nodesVisited++;
+        if (t == nullptr) {
+            t = new typename BinarySearchTree<Key, Data>::Node(k, data);
+            t->left = nullptr;
+            t->right = nullptr;
+            t->parent = nullptr;
+            inserted = true;
+            return t;
         }
 
-    }
+        if (k == t->key) {
+            inserted = false;
+            return t;
+        }
 
-     // Insert data with the given key (iterative)
-    bool insert(const Key& key, const Data& data) {
-        typename BinarySearchTree<Key,Data>::Node* y = nullptr;
-        typename BinarySearchTree<Key,Data>::Node* x = this->getRoot();
-        typename BinarySearchTree<Key,Data>::Node* newNode = new typename BinarySearchTree<Key,Data>::Node(key, data);
-
-        // 1. Find where to insert the new node
-        while (x != nullptr) {
-            y = x;
-            if (key < this->getKey(x)) {
-                x = this->getLeft(x);
+        if (k < t->key) {
+            t->left = BST_Root_Insert(t->left, k, data, inserted);
+             if (t->left) t->left->parent = t;
+            this->nodesVisited+=2;
+            if (inserted) {
+                t=R(t);
                 this->nodesVisited++;
-            } else if (key > this->getKey(x)){
-                x = this->getRight(x);
-                this->nodesVisited++;
+                return t;
             } else {
-                // Key already exists, return false
-                delete newNode;
-                return false;
+                return t;
+            }
+        } else {
+            t->right = BST_Root_Insert(t->right, k, data, inserted);
+             if (t->right) t->right->parent = t;
+             this->nodesVisited+=2;
+            if (inserted) {
+                t=L(t);
+                this->nodesVisited++;
+                return t;
+            } else {
+                return t;
             }
         }
+    }
 
-        this->setParent(newNode, y);
+    //Iterative RND_Insert with Probabilistic Root Insertion - псевдокод
+    typename BinarySearchTree<Key, Data>::Node* RND_Insert(typename BinarySearchTree<Key, Data>::Node* root, const Key& k, const Data& data, bool& inserted) {
+        typename BinarySearchTree<Key, Data>::Node* newNode = new typename BinarySearchTree<Key, Data>::Node(k, data);
+        newNode->parent = nullptr;  // Initially no parent
+        this->nodesVisited = 0;     // Reset node visit count
 
-        // 2. Insert the new node
-        if (y == nullptr) {
-            this->setRoot(newNode); // Tree was empty
-        } else if (key < this->getKey(y)) {
-            this->setLeft(y, newNode);
-        } else {
-            this->setRight(y,newNode);
+        // Calculate probability to insert at root
+        // Рандомизация на вставку в корень
+        if (rand() < RAND_MAX / (countNodes(root) + 1)) {
+            // Insert at root - Rotate the tree
+            newNode = BST_Root_Insert(root, k, data, inserted);
+            this->root = newNode;
+            inserted = true;
+            this->size++;
+            return newNode;
         }
+        // Iteratively find the insertion position in the subtree
+        else {
+            // Iteratively find the insertion position in the subtree
+            typename BinarySearchTree<Key, Data>::Node* current = root;
+            typename BinarySearchTree<Key, Data>::Node* parent = nullptr;
 
-        ++this->size;
-
-        // 3. Randomized Balancing:  "Treap" property - higher priority nodes stay closer to the root
-        while (newNode != this->getRoot() && dis(gen) < 1.0 / (1.0 + this->size)) {
-            if (newNode == this->getLeft(this->getParent(newNode))) {
-                newNode = rotateRight(this->getParent(newNode));
-            } else {
-                newNode = rotateLeft(this->getParent(newNode));
+            while (current != nullptr) {
+                this->nodesVisited++;
+                parent = current;
+                if (k < current->key) {
+                    current = current->left;
+                } else if (k > current->key) {
+                    current = current->right;
+                } else {
+                    // Key already exists - no insertion
+                    inserted = false;
+                    delete newNode;
+                    return root; // Return root
+                }
             }
-        }
-        return true;
-    }
 
-    // Remove data with the given key (iterative)
-    bool remove(const Key& key) {
-        typename BinarySearchTree<Key,Data>::Node* node = this->findNode(key);
-        if (node) {
-            this->removeNode(node);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-private:
-    // Helper function to transplant (iterative) -  Same as base class, but in derived class for access.
-    void transplant(typename BinarySearchTree<Key,Data>::Node* u, typename BinarySearchTree<Key,Data>::Node* v) {
-        if (!this->getParent(u)) {
-            this->setRoot(v);
-        } else if (u == this->getLeft(this->getParent(u))) {
-            this->setLeft(this->getParent(u),v);
-        } else {
-            this->setRight(this->getParent(u),v);
-        }
-        if (v) {
-            this->setParent(v,this->getParent(u));
+            // Insert new node as leaf
+            newNode->parent = parent;
+            if (k < parent->key) {
+                parent->left = newNode;
+            } else {
+                parent->right = newNode;
+            }
+            inserted = true;
+            this->size++;
+            return root;
         }
     }
 
-
-    // Find node by key (iterative) -  Same as base class, but in derived class for access.
-    typename BinarySearchTree<Key,Data>::Node* findNode(const Key& key) const {
+    // Iterative Search
+    typename BinarySearchTree<Key, Data>::Node* iterativeFindNode(const Key& key) const {
         this->nodesVisited = 0;
-        typename BinarySearchTree<Key,Data>::Node* current = this->getRoot();
+        typename BinarySearchTree<Key, Data>::Node* current = this->root;
         while (current) {
-            ++this->nodesVisited;
-            if (key == this->getKey(current)) {
+            this->nodesVisited++;
+            if (key == current->key) {
                 return current;
-            } else if (key < this->getKey(current)) {
-                current = this->getLeft(current);
+            } else if (key < current->key) {
+                current = current->left;
             } else {
-                current = this->getRight(current);
+                current = current->right;
             }
         }
         return nullptr;
     }
 
-        void removeNode(typename BinarySearchTree<Key,Data>::Node* node) {
-        if (!this->getLeft(node)) {
-            transplant(node, this->getRight(node));
-        } else if (!this->getRight(node)) {
-            transplant(node, this->getLeft(node));
-        } else {
-            typename BinarySearchTree<Key,Data>::Node* y = findMin(this->getRight(node));
-            if (this->getParent(y) != node) {
-                transplant(y, this->getRight(y));
-                this->setRight(y,this->getRight(node));
-                this->setParent(this->getRight(node),y);
-            }
-            transplant(node, y);
-            this->setLeft(y,this->getLeft(node));
-            this->setParent(this->getLeft(node),y);
-        }
-        delete node;
-        --this->size;
+public:
+    RandomizedBinarySearchTree() : BinarySearchTree<Key, Data>(), rd(), gen(rd()), dis(0.0, 1.0) {}
+
+    // Override insert
+    bool insert(const Key& key, const Data& data) {
+        bool inserted = false;
+        this->nodesVisited = 0; // Reset nodesVisited before insert
+        this->root = RND_Insert(this->root, key, data, inserted);
+        this->setRoot(this->root);
+        return inserted;
     }
 
+
+    // Override remove
+    bool remove(const Key& key) {
+        bool deleted = false;
+        this->root = RND_Delete(this->root, key, deleted);
+        return deleted;
+    }
+
+    //Override find
+    bool contains(const Key& key) const {
+        typename BinarySearchTree<Key, Data>::Node* node = iterativeFindNode(key);
+        return node != nullptr;
+    }
+
+    void printLevelOrder() const {
+        if (this->root == nullptr) {
+            std::cout << "Tree is empty" << std::endl;
+            return;
+        }
+
+        std::queue<typename BinarySearchTree<Key, Data>::Node*> q;
+        q.push(this->root);
+
+        while (!q.empty()) {
+            typename BinarySearchTree<Key, Data>::Node* node = q.front();
+            q.pop();
+
+            std::cout << node->key << " ";
+
+            if (node->left != nullptr) {
+                q.push(node->left);
+            }
+            if (node->right != nullptr) {
+                q.push(node->right);
+            }
+        }
+        std::cout << std::endl;
+    }
 };
