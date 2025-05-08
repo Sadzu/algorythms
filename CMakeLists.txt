@@ -4,8 +4,6 @@ project(untitled)
 set(CMAKE_CXX_STANDARD 20)
 
 add_executable(untitled sources/main.cpp
-        headers/Btree.h
-        headers/BinarySearchTree.h
-        headers/bst_tests.h
-        headers/RandomizedBinarySearchTree.h
-        headers/RandomBstTests.h)
+        headers/Graph.h
+        headers/ShortestPathUnweighted.h
+)
