@@ -38,12 +38,38 @@ void PrintVertices(const Graph& graph) {
     }
 }
 
+#include <iomanip>  // Для форматирования вывода
+
 void PrintMatrix(const vector<vector<int>>& matrix) {
-    cout << "\nShortest Path Matrix:" << endl;
-    for(const auto& row : matrix) {
-        for(int val : row) {
-            if(val == -1) cout << "∞ ";
-            else cout << val << " ";
+    if(matrix.empty()) {
+        cout << "Matrix is empty!" << endl;
+        return;
+    }
+
+    const size_t n = matrix.size();
+    const int col_width = 3;  // Ширина колонки для выравнивания
+
+    cout << "\nShortest Path Matrix:\n";
+
+    // Заголовок - номера столбцов
+    cout << setw(col_width) << " " << " |";
+    for(size_t col = 0; col < n; ++col) {
+        cout << setw(col_width) << col;
+    }
+    cout << "\n----|-" << string(n * col_width, '--') << endl;
+
+    // Тело матрицы с номерами строк
+    for(size_t row = 0; row < n; ++row) {
+        // Номер строки
+        cout << setw(col_width) << row << " |";
+
+        // Элементы строки
+        for(const auto& val : matrix[row]) {
+            if(val == -1) {
+                cout << setw(col_width) << "X";
+            } else {
+                cout << setw(col_width) << val;
+            }
         }
         cout << endl;
     }

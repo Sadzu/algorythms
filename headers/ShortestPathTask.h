@@ -1,9 +1,10 @@
-// Файл: ShortestPathTask.h
 #pragma once
 #include "SimpleGraph.h"
 #include <vector>
 #include <queue>
 #include <limits>
+#include <stdexcept>
+#include <string>
 
 template<typename Graph>
 class ShortestPathTask {
@@ -37,8 +38,8 @@ public:
 
 private:
     void Solve() {
-        if(!(graph_ptr->Directed())) {
-            throw std::logic_error("This task requires directed graph");
+        if(!graph_ptr->Directed()) {
+            throw std::logic_error("This task requires a directed graph");
         }
 
         const size_t V = graph_ptr->V();
@@ -51,6 +52,7 @@ private:
     }
 
     void BFS(size_t start_idx, std::vector<int>& distances) {
+        const size_t num_vertices = graph_ptr->V();
         std::queue<size_t> q;
         q.push(start_idx);
         distances[start_idx] = 0;
@@ -61,11 +63,30 @@ private:
 
             auto u = graph_ptr->vertex_at(u_idx);
             for(auto it = graph_ptr->out_edges_begin(u); it != graph_ptr->out_edges_end(u); ++it) {
-                size_t v_idx = (*it).v2()->GetId();
-                if(distances[v_idx] == INF) {
-                    distances[v_idx] = distances[u_idx] + 1;
-                    q.push(v_idx);
+                try {
+                    const auto& edge = *it;
+                    size_t v_idx;
+                    try {
+                        v_idx = edge.v2()->GetId();
+                    } catch(const std::exception& e) {
+                        std::cerr << "Error accessing vertex ID: " << e.what() << std::endl;
+                        continue;
+                    }
+
+                    if (v_idx >= num_vertices) {
+                        std::cerr << "Warning: Invalid vertex ID " << v_idx
+                                  << " detected in edge. Skipping." << std::endl;
+                        continue;
+                    }
+
+                    if (distances[v_idx] == INF) {
+                        distances[v_idx] = distances[u_idx] + 1;
+                        q.push(v_idx);
+                    }
+                } catch (std::out_of_range &e) {
+                    break;
                 }
+
             }
         }
 

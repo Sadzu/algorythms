@@ -238,12 +238,10 @@ public:
         });
     }
 
-    std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::OutEdgeIteratorImpl>
-outEdgesIterator(std::shared_ptr<VertexDesc> vertex) const override {
-        return std::make_unique<LGraphOutEdgeIteratorImpl>(
-            adjacency[vertex->GetId()].begin(),
-            adjacency[vertex->GetId()].end()
-        );
+    std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::OutEdgeIteratorImpl> outEdgesIterator(std::shared_ptr<VertexDesc> v) const override {
+        size_t id = v->GetId();
+        if (id >= adjacency.size()) throw std::out_of_range("Vertex ID out of range");
+        return std::make_unique<LGraphOutEdgeIteratorImpl>(adjacency[id].begin(), adjacency[id].end());
     }
 
     std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::OutEdgeIteratorImpl>

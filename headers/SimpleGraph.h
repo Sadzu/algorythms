@@ -294,7 +294,6 @@ public:
         return it != name_map.end() ? it->second : nullptr;
     }
 
-    // В класс SimpleGraph добавить:
 public:
     void print() const {
         std::cout << "\n=== Graph ===" << std::endl;
@@ -309,9 +308,9 @@ public:
             if (v->IsNamed()) {
                 std::cout << " Name: '" << v->GetName() << "'";
             }
-            if (v->GetData()) {
-                std::cout << " Data: " << v->GetData();
-            }
+            // if (v->GetData()) {
+            //     std::cout << " Data: " << v->GetData();
+            // }
             std::cout << "]" << std::endl;
         }
 
@@ -338,12 +337,16 @@ private:
             bool first = true;
             for (auto it = out_edges_begin(v); it != out_edges_end(v); ++it) {
                 if (!first) std::cout << ", ";
-                const auto& edge = *it;
-                std::cout << edge.v2()->GetId();
-                if (edge.IsWeighted()) {
-                    std::cout << " (w=" << edge.GetW() << ")";
+                try {
+                    const auto& edge = *it;
+                    std::cout << edge.v2()->GetId();
+                    // if (edge.IsWeighted()) {
+                    //     std::cout << " (w=" << edge.GetW() << ")";
+                    // }
+                    first = false;
+                } catch(const std::exception&) {
+                    break;
                 }
-                first = false;
             }
             std::cout << std::endl;
         }
@@ -352,8 +355,8 @@ private:
     void printMatrix() const {
         const size_t n = V();
         // Шапка таблицы
-        std::cout << "    ";
-        for (size_t i = 0; i < n; ++i) std::cout << i << "    ";
+        std::cout << "     ";
+        for (size_t i = 0; i < n; ++i) std::cout << i << "  ";
         std::cout << "\n    ";
         for (size_t i = 0; i < n; ++i) std::cout << "-----";
         std::cout << std::endl;
@@ -365,17 +368,38 @@ private:
                 auto edge = GetEdge(getVertices()[i], getVertices()[j]);
                 if (edge) {
                     if (edge->IsWeighted()) {
-                        std::cout << std::setw(4) << edge->GetW() << " ";
+                        std::cout << " " << 1 << " ";
                     } else {
-                        std::cout << "  X  ";
+                        std::cout << " X ";
                     }
                 } else {
-                    std::cout << "  -  ";
+                    std::cout << " 0 ";
                 }
             }
             std::cout << std::endl;
         }
     }
 };
+
+
+
+// пасхалка момент
+// ……………………………....…………._¸„„„„_
+// ……………………....…………...„--~*'¯…….'\
+// ………….…....………………… („-~~--„¸_….,/ì'Ì
+// ……....………….………….¸„-^"¯ : : : : :¸-¯"¯/'
+// ………....……………¸„„-^"¯ : : : : : : : '\¸„„,-"
+// **¯¯¯'^^~-„„„----~^*'"¯ : : : : : : : : : :¸-"
+// .:.:.:.:.„-^" : : : : : : : : : : : : : : : : :„-"
+// :.:.:.:.:.:.:.:.:.:.: : : : : : : : : : ¸„-^¯
+// .::.:.:.:.:.:.:.:. : : : : : : : ¸„„-^¯
+// :.' : : '\ : : : : : : : ;¸„„-~"
+// :.:.:: :"-„""***/*'ì¸'¯
+// :.': : : : :"-„ : : :"\
+// .:.:.: : : : :" : : : : \,
+// :.: : : : : : : : : : : : 'Ì
+// : : : : : : :, : : : : : :/
+// "-„_::::_„-*__„„~"
+
 
 
