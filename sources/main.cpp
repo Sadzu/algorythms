@@ -380,12 +380,6 @@ int main() {
                     cout << edgeIterator.operator*().GetData() << endl;
                     break;
                 case 36:
-                    // try {
-                    //     *edgeIterator;
-                    //     cout << 0 << endl;
-                    // } catch (std::exception &e) {
-                    //     cout << 1 << endl;
-                    // }
                     cout << !edgeIterator.operator!=(graph.edges_end()) << endl;
                     break;
                 case 37:
