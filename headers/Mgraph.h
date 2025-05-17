@@ -235,10 +235,14 @@ public:
         }
     };
 
-    void removeEdge(std::shared_ptr<VertexDesc> v1,
+    bool removeEdge(std::shared_ptr<VertexDesc> v1,
                  std::shared_ptr<VertexDesc> v2) override
     {
-        matrix[v1->GetId()][v2->GetId()].reset();
+        if (matrix[v1->getId()][v2->getId()] != nullptr) {
+            matrix[v1->GetId()][v2->GetId()].reset();
+            return true;
+        }
+        return false;
     }
 
     std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::OutEdgeIteratorImpl>

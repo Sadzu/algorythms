@@ -144,8 +144,7 @@ void HandleRemoveVertex(Graph& graph) {
 
     try {
         auto vertex = graph.getVertices().at(id);
-        graph.DeleteV(vertex);
-        cout << "Vertex removed successfully!" << endl;
+        cout << graph.DeleteV(vertex) << endl;
     } catch(const exception& e) {
         cerr << "Exception: " << e.what() << endl;
     }
@@ -162,8 +161,7 @@ void HandleRemoveEdge(Graph& graph) {
     try {
         auto v1 = graph.getVertices().at(id1);
         auto v2 = graph.getVertices().at(id2);
-        graph.DeleteE(v1, v2);
-        cout << "Edge removed successfully!" << endl;
+        cout << graph.DeleteE(v1, v2) << endl;
     } catch(const exception& e) {
         cerr << "Exception: " << e.what() << endl;
     }
@@ -380,13 +378,13 @@ int main() {
                     cout << edgeIterator.operator*().GetData() << endl;
                     break;
                 case 36:
-                    // try {
-                    //     *edgeIterator;
-                    //     cout << 0 << endl;
-                    // } catch (std::exception &e) {
-                    //     cout << 1 << endl;
-                    // }
-                    cout << !edgeIterator.operator!=(graph.edges_end()) << endl;
+                    try {
+                        *edgeIterator;
+                        cout << 0 << endl;
+                    } catch (std::exception &e) {
+                        cout << 1 << endl;
+                    }
+                    //cout << !edgeIterator.operator!=(graph.edges_end()) << endl;
                     break;
                 case 37:
                     cout << "Enter vertex ID: ";
@@ -434,7 +432,7 @@ int main() {
                 case 41:
                     try {
                         bool is_end = (outEdgeIterator != outEdgeIteratorEnd);
-                        cout << "Iterator is " << (is_end ? "at end" : "not at end") << endl;
+                        cout << is_end << endl;
                     } catch (const exception& e) {
                         cerr << "Exception: " << e.what() << endl;
                     }

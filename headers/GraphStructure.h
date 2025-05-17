@@ -24,7 +24,7 @@ public:
         std::shared_ptr<VertexDesc> v2) const = 0;
     virtual void convertFrom(const GraphStructure& other) = 0;
     virtual void addVertex() = 0;
-    virtual void removeEdge(std::shared_ptr<VertexDesc> v1,
+    virtual bool removeEdge(std::shared_ptr<VertexDesc> v1,
                           std::shared_ptr<VertexDesc> v2) = 0;
     virtual size_t vertexCount() const = 0;
     virtual bool isDirected() const = 0;

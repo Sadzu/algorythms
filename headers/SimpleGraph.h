@@ -155,8 +155,12 @@ public:
         return v;
     }
 
-    void DeleteV(std::shared_ptr<VertexDesc> v) {
-        validate_vertex(v);
+    bool DeleteV(std::shared_ptr<VertexDesc> v) {
+        try {
+            validate_vertex(v);
+        } catch (std::invalid_argument& e) {
+            return false;
+        }
 
         // Удаляем из name_map
         if(v->IsNamed())
@@ -171,6 +175,8 @@ public:
 
         // Удаляем из структуры
         structure->removeVertex(v);
+
+        return true;
     }
 
     std::shared_ptr<EdgeDesc> InsertE(std::shared_ptr<VertexDesc> v1,
@@ -193,12 +199,12 @@ public:
         return edge;
     }
 
-    void DeleteE(std::shared_ptr<VertexDesc> v1,
+    bool DeleteE(std::shared_ptr<VertexDesc> v1,
             std::shared_ptr<VertexDesc> v2)
     {
         validate_vertex(v1);
         validate_vertex(v2);
-        structure->removeEdge(v1, v2); // Теперь передаем 2 вершины
+        return structure->removeEdge(v1, v2); // Теперь передаем 2 вершины
     }
 
     std::shared_ptr<EdgeDesc> GetEdge(std::shared_ptr<VertexDesc> v1,
@@ -476,3 +482,51 @@ private:
         return structure;
     }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// пасхалка момент
+//       ╭┬───┬╮
+//      ╭╯│   │╰╮
+//     ╭╯ │   │ ╰╮
+//    ╱   │   │   ╲
+//   ╱    ░▄████▄░  ╲
+//  │    ██████████  │▒
+//  │    ██■■■■■■██  │▒
+//  │    ██▒▒▒▒▒▒██  │▓
+//   ╲  ██▒▒▒▒▒▒██  ╱▓
+//    ╲  ░▀████▀░  ╱▓
+//     ╲_    ░   _╱ ▓
+//       │   ░▒▓│ ▓
+//      ╭┴───┬──┴╮
+//    _(   ╭⊙┬⊙╮  )_
+//  (    \│▒▓▓│/     )
+//   \____(╲_╱╱)____/
+//      │║║│║║│
+//      │║║│║║│
+//      ╘╧╧│╧╧╛
+//        ░▒▓██
+//       «HARD»

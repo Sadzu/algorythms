@@ -229,13 +229,16 @@ public:
         }
     };
 
-    void removeEdge(std::shared_ptr<VertexDesc> v1,
+    bool removeEdge(std::shared_ptr<VertexDesc> v1,
                   std::shared_ptr<VertexDesc> v2) override
     {
         auto& edges = adjacency[v1->GetId()];
+        if (edges.empty()) return false;
         edges.remove_if([&](const auto& edge) {
             return edge->v2() == v2;
         });
+
+        return true;
     }
 
     std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::OutEdgeIteratorImpl> outEdgesIterator(std::shared_ptr<VertexDesc> v) const override {
