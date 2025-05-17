@@ -26,9 +26,11 @@ public:
     std::shared_ptr<VertexDesc> v2() const noexcept { return target; }
 
     // Управление весом
-    void SetW(WeightType w) noexcept {
+    bool SetW(WeightType w) {
         weight = w;
         weighted = true;
+
+        return true;
     }
 
     WeightType GetW() const {
@@ -38,7 +40,7 @@ public:
     }
 
     // Работа с данными
-    void SetData(const DataType& d) noexcept { data = d; }
+    bool SetData(const DataType& d) noexcept { data = d; return true; }
     DataType GetData() const noexcept { return data; }
 
     // Проверки

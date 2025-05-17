@@ -164,7 +164,7 @@ public:
         for(const auto& edge : adjacency[v1->getId()]) {
             if(edge->v2()->getId() == v2->getId()) return edge;
         }
-        return nullptr;
+        throw std::logic_error("Edge does not exist");
     }
 
     bool isDirected() const override { return is_directed; }
@@ -266,5 +266,69 @@ public:
                 edge->UpdateVertices(mapper(edge->v1()), mapper(edge->v2()));
             }
         }
+    }
+
+    class LEdgeIteratorImpl : public GraphStructure<VertexDesc, EdgeDesc>::EdgeIteratorImpl {
+        typename std::vector<EdgeList>::const_iterator outer;
+        typename EdgeList::const_iterator inner;
+        const LGraph* graph;
+
+    public:
+        LEdgeIteratorImpl(const LGraph* g, bool end = false)
+            : graph(g), outer(end ? g->adjacency.end() : g->adjacency.begin())
+        {
+            if (!end && outer != g->adjacency.end()) {
+                inner = outer->begin();
+                advance_to_valid();
+            }
+        }
+
+        void next() override {
+            if (outer == graph->adjacency.end()) {
+                throw std::out_of_range("Incrementing end iterator");
+            }
+            ++inner;
+            advance_to_valid();
+        }
+
+        bool equals(const typename GraphStructure<VertexDesc, EdgeDesc>::EdgeIteratorImpl* other) const override {
+            const auto* rhs = dynamic_cast<const LEdgeIteratorImpl*>(other);
+            return rhs && outer == rhs->outer && inner == rhs->inner;
+        }
+
+        const EdgeDesc& current() const override {
+            if (outer == graph->adjacency.end() || inner == outer->end()) {
+                throw std::out_of_range("Dereferencing invalid iterator");
+            }
+            return **inner;
+        }
+
+        bool is_valid() const override {
+            return outer != graph->adjacency.end() && inner != outer->end();
+        }
+
+        std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::EdgeIteratorImpl> clone() const override {
+            return std::make_unique<LEdgeIteratorImpl>(*this);
+        }
+
+    private:
+        void advance_to_valid() {
+            while (outer != graph->adjacency.end()) {
+                if (inner != outer->end()) return;
+                ++outer;
+                if (outer != graph->adjacency.end()) {
+                    inner = outer->begin();
+                }
+            }
+        }
+    };
+
+    // Реализация методов для GraphStructure
+    std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::EdgeIteratorImpl> edgesIterator() const override {
+        return std::make_unique<LEdgeIteratorImpl>(this);
+    }
+
+    std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::EdgeIteratorImpl> edgesEndIterator() const override {
+        return std::make_unique<LEdgeIteratorImpl>(nullptr);
     }
 };

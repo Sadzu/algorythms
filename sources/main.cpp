@@ -23,6 +23,31 @@ void PrintMenu() {
     cout << "14. Visualize graph" << endl;
     cout << "15. Make new graph" << endl;
     cout << "16. Generate random graph" << endl;
+    cout << "17. Set vertex data by id" << endl;
+    cout << "18. Set vertex name by id" << endl;
+    cout << "19. Get vertex data by id" << endl;
+    cout << "20. Get vertex name by id" << endl;
+    cout << "21. v1() by id" << endl;
+    cout << "22. v2() by id" << endl;
+    cout << "23. SetW by id of 2 vertices" << endl;
+    cout << "24. GetW by id of 2 vertices" << endl;
+    cout << "25. Set edge data by id of 2 vertices" << endl;
+    cout << "26. Get edge data by id of 2 vertices" << endl;
+    cout << "27. Vertex begin()" << endl;
+    cout << "28. Vertex end()" << endl;
+    cout << "29. Vertex++" << endl;
+    cout << "30. Vertex*" << endl;
+    cout << "31. Vertex==end" << endl;
+    cout << "32. Edge begin()" << endl;
+    cout << "33. Edge end()" << endl;
+    cout << "34. Edge++" << endl;
+    cout << "35. Edge*" << endl;
+    cout << "36. Edge==end" << endl;
+    cout << "37. Out edge begin()" << endl;
+    cout << "38. Out edge end()" << endl;
+    cout << "39. Out edge++" << endl;
+    cout << "40. Out edge*" << endl;
+    cout << "41. Out edge==end" << endl;
     cout << "0.  Exit" << endl;
     cout << "============================" << endl;
     cout << "Enter your choice: ";
@@ -81,7 +106,7 @@ void HandleShortestPath(Graph& graph) {
         ShortestPathTask<Graph> task(&graph);
         PrintMatrix(task.Result());
     } catch(const exception& e) {
-        cerr << "Error: " << e.what() << endl;
+        cerr << "Exception: " << e.what() << endl;
     }
 }
 
@@ -107,7 +132,7 @@ void HandleAddEdge(Graph& graph, bool weighted) {
         }
         cout << "Edge added successfully!" << endl;
     } catch(const exception& e) {
-        cerr << "Error: " << e.what() << endl;
+        cerr << "Exception: " << e.what() << endl;
     }
 }
 
@@ -122,7 +147,7 @@ void HandleRemoveVertex(Graph& graph) {
         graph.DeleteV(vertex);
         cout << "Vertex removed successfully!" << endl;
     } catch(const exception& e) {
-        cerr << "Error: " << e.what() << endl;
+        cerr << "Exception: " << e.what() << endl;
     }
 }
 
@@ -140,7 +165,7 @@ void HandleRemoveEdge(Graph& graph) {
         graph.DeleteE(v1, v2);
         cout << "Edge removed successfully!" << endl;
     } catch(const exception& e) {
-        cerr << "Error: " << e.what() << endl;
+        cerr << "Exception: " << e.what() << endl;
     }
 }
 
@@ -150,7 +175,15 @@ int main() {
     int choice;
     bool directed;
     bool dense;
-
+    string str;
+    int data;
+    float weight;
+    size_t vertex_id;
+    size_t vertex_id_2;
+    Graph::VertexIterator vertexIterator = graph.vertex_begin();
+    Graph::EdgeIterator edgeIterator = graph.edges_begin();
+    Graph::OutEdgeIterator outEdgeIterator{nullptr};
+    Graph::OutEdgeIterator outEdgeIteratorEnd{nullptr};
 
     while(true) {
         PrintMenu<Graph>();
@@ -259,13 +292,159 @@ int main() {
                     graph.GenerateDirectedGraph(v, e);
                     cout << "Graph generated: " << v << " vertices, " << e << " edges\n";
                     break;
-
+                case 17:
+                    cout << "Enter vertex id: ";
+                    cin >> vertex_id;
+                    cout << "Enter new data: ";
+                    cin >> data;
+                    cout << graph.vertex_at(vertex_id)->SetData(data) << endl;
+                    break;
+                case 18:
+                    cout << "Enter vertex id: ";
+                    cin >> vertex_id;
+                    cout << "Enter new name: ";
+                    cin >> str;
+                    cout << graph.vertex_at(vertex_id)->SetName(str) << endl;
+                    break;
+                case 19:
+                    cout << "Enter vertex id: ";
+                    cin >> vertex_id;
+                    cout << graph.vertex_at(vertex_id)->GetData() << endl;
+                    break;
+                case 20:
+                    cout << "Enter vertex id: ";
+                    cin >> vertex_id;
+                    cout << graph.vertex_at(vertex_id)->GetName() << endl;
+                    break;
+                case 23:
+                    cout << "Enter first vertex id: ";
+                    cin >> vertex_id;
+                    cout << "Enter second vertex id: ";
+                    cin >> vertex_id_2;
+                    cout << "Enter new weight: ";
+                    cin >> weight;
+                    try {
+                        cout << graph.GetEdge(graph.vertex_at(vertex_id), graph.vertex_at(vertex_id_2))->SetW(weight) << endl;
+                    } catch (std::exception &e) {
+                        cerr << "Exception: " << e.what() << endl;
+                    }
+                    break;
+                case 24:
+                    cout << "Enter first vertex id: ";
+                    cin >> vertex_id;
+                    cout << "Enter second vertex id: ";
+                    cin >> vertex_id_2;
+                    cout << graph.GetEdge(graph.vertex_at(vertex_id), graph.vertex_at(vertex_id_2))->GetW() << endl;
+                    break;
+                case 25:
+                    cout << "Enter first vertex id: ";
+                    cin >> vertex_id;
+                    cout << "Enter second vertex id: ";
+                    cin >> vertex_id_2;
+                    cout << "Enter new data: ";
+                    cin >> str;
+                    cout << graph.GetEdge(graph.vertex_at(vertex_id), graph.vertex_at(vertex_id_2))->SetData(str) << endl;
+                    break;
+                case 26:
+                    cout << "Enter first vertex id: ";
+                    cin >> vertex_id;
+                    cout << "Enter second vertex id: ";
+                    cin >> vertex_id_2;
+                    cout << graph.GetEdge(graph.vertex_at(vertex_id), graph.vertex_at(vertex_id_2))->GetData() << endl;
+                    break;
+                case 27:
+                    vertexIterator = graph.vertex_begin();
+                    break;
+                case 28:
+                    vertexIterator = graph.vertex_end();
+                    break;
+                case 29:
+                    ++vertexIterator;
+                    break;
+                case 30:
+                    cout << vertexIterator.operator*().GetData() << endl;
+                    break;
+                case 31:
+                    cout << !vertexIterator.operator!=(graph.vertex_end()) << endl;
+                    break;
+                case 32:
+                    edgeIterator = graph.edges_begin();
+                    break;
+                case 33:
+                    edgeIterator = graph.edges_end();
+                    break;
+                case 34:
+                    ++edgeIterator;
+                    break;
+                case 35:
+                    cout << edgeIterator.operator*().GetData() << endl;
+                    break;
+                case 36:
+                    // try {
+                    //     *edgeIterator;
+                    //     cout << 0 << endl;
+                    // } catch (std::exception &e) {
+                    //     cout << 1 << endl;
+                    // }
+                    cout << !edgeIterator.operator!=(graph.edges_end()) << endl;
+                    break;
+                case 37:
+                    cout << "Enter vertex ID: ";
+                    cin >> vertex_id;
+                    try {
+                        auto vert = graph.vertex_at(vertex_id);
+                        outEdgeIterator = graph.out_edges_begin(vert);
+                        outEdgeIteratorEnd = graph.out_edges_end(vert);
+                        cout << "Out edge iterator initialized for vertex " << vertex_id << endl;
+                    } catch (const exception& e) {
+                        cerr << "Exception: " << e.what() << endl;
+                    }
+                    break;
+                case 38:
+                    cout << "Enter vertex ID: ";
+                    cin >> vertex_id;
+                    try {
+                        auto v = graph.vertex_at(vertex_id);
+                        outEdgeIterator = graph.out_edges_end(v);
+                        cout << "Out edge end iterator initialized for vertex " << vertex_id << endl;
+                    } catch (const exception& e) {
+                        cerr << "Exception: " << e.what() << endl;
+                    }
+                    break;
+                case 39:
+                    try {
+                        ++outEdgeIterator;
+                        cout << "Iterator advanced to next out edge" << endl;
+                    } catch (const exception& e) {
+                        cerr << "Exception: " << e.what() << endl;
+                    }
+                    break;
+                case 40:
+                    try {
+                        auto edge = *outEdgeIterator;
+                        cout << "Current edge: " << edge.v1()->GetId() << " -> " << edge.v2()->GetId();
+                        if (edge.IsWeighted()) {
+                            cout << " (weight: " << edge.GetW() << ")";
+                        }
+                        cout << endl;
+                    } catch (const exception& e) {
+                        cerr << "Exception: " << e.what() << endl;
+                    }
+                    break;
+                case 41:
+                    try {
+                        bool is_end = (outEdgeIterator != outEdgeIteratorEnd);
+                        cout << "Iterator is " << (is_end ? "at end" : "not at end") << endl;
+                    } catch (const exception& e) {
+                        cerr << "Exception: " << e.what() << endl;
+                    }
+                    break;
                 default:
                     cout << "Invalid choice. Please try again." << endl;
                     break;
             }
         } catch(const exception& e) {
-            cerr << "Error: " << e.what() << endl;
+            cerr << "Exception: " << e.what() << endl;
         }
     }
 }

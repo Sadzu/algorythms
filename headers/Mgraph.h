@@ -157,7 +157,8 @@ public:
         const size_t i = v1->getId();
         const size_t j = v2->getId();
         if(i >= matrix.size() || j >= matrix.size()) return nullptr;
-        return matrix[i][j];
+        if (matrix[i][j] != nullptr) return matrix[i][j];
+        throw std::logic_error("Edge does not exist");
     }
 
     bool isDirected() const override { return is_directed; }
@@ -272,5 +273,72 @@ outEdgesIterator(std::shared_ptr<VertexDesc> vertex) const override {
                 }
             }
         }
+    }
+
+    class MEdgeIteratorImpl : public GraphStructure<VertexDesc, EdgeDesc>::EdgeIteratorImpl {
+        typename std::vector<MatrixRow>::const_iterator row_it;
+        typename MatrixRow::const_iterator col_it;
+        const MGraph* graph;
+
+    public:
+        MEdgeIteratorImpl(const MGraph* g, bool end = false)
+            : graph(g), row_it(end ? g->matrix.end() : g->matrix.begin())
+        {
+            if (!end && row_it != g->matrix.end()) {
+                col_it = row_it->begin();
+                advance_to_valid();
+            }
+        }
+
+        void next() override {
+            if (row_it == graph->matrix.end()) {
+                throw std::out_of_range("Incrementing end iterator");
+            }
+            ++col_it;
+            advance_to_valid();
+        }
+
+        bool equals(const typename GraphStructure<VertexDesc, EdgeDesc>::EdgeIteratorImpl* other) const override {
+            const auto* rhs = dynamic_cast<const MEdgeIteratorImpl*>(other);
+            return rhs && row_it == rhs->row_it && col_it == rhs->col_it;
+        }
+
+        const EdgeDesc& current() const override {
+            if (row_it == graph->matrix.end() || col_it == row_it->end()) {
+                throw std::out_of_range("Dereferencing invalid iterator");
+            }
+            return **col_it;
+        }
+
+        bool is_valid() const override {
+            return row_it != graph->matrix.end() && col_it != row_it->end();
+        }
+
+        std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::EdgeIteratorImpl> clone() const override {
+            return std::make_unique<MEdgeIteratorImpl>(*this);
+        }
+
+    private:
+        void advance_to_valid() {
+            while (row_it != graph->matrix.end()) {
+                while (col_it != row_it->end()) {
+                    if (*col_it) return;
+                    ++col_it;
+                }
+                ++row_it;
+                if (row_it != graph->matrix.end()) {
+                    col_it = row_it->begin();
+                }
+            }
+        }
+    };
+
+    // Реализация методов для GraphStructure
+    std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::EdgeIteratorImpl> edgesIterator() const override {
+        return std::make_unique<MEdgeIteratorImpl>(this);
+    }
+
+    std::unique_ptr<typename GraphStructure<VertexDesc, EdgeDesc>::EdgeIteratorImpl> edgesEndIterator() const override {
+        return std::make_unique<MEdgeIteratorImpl>(nullptr);
     }
 };

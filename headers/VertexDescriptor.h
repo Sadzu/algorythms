@@ -5,6 +5,7 @@
 
 template<typename NameType, typename DataType>
 class VertexDescriptor {
+private:
     NameType name;
     DataType data;
     bool name_defined = false;
@@ -25,9 +26,10 @@ public:
     size_t GetId() const noexcept { return id; }
 
     // Работа с именем
-    void SetName(const NameType& new_name) {
+    bool SetName (const NameType& new_name) {
         name = new_name;
         name_defined = true;
+        return true;
     }
 
     NameType GetName() const {
@@ -37,7 +39,7 @@ public:
     }
 
     // Работа с данными
-    void SetData(const DataType& new_data) { data = new_data; }
+    bool SetData(const DataType& new_data) { data = new_data; return true; }
     DataType GetData() const noexcept { return data; }
 
     // Проверки

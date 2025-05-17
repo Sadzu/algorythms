@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <iomanip>
 #include <cmath>
+#include <format>
 #include <random>
 
 template<
@@ -143,6 +144,17 @@ public:
         return v;
     }
 
+    std::shared_ptr<VertexDesc> InsertV(const NameType& name, const VertexData& data) {
+        if(name_map.count(name))
+            throw std::invalid_argument("Vertex name already exists");
+
+        auto v = InsertV();
+        v->SetName(name);
+        v->SetData(data);
+        name_map[name] = v;
+        return v;
+    }
+
     void DeleteV(std::shared_ptr<VertexDesc> v) {
         validate_vertex(v);
 
@@ -199,24 +211,95 @@ public:
 
     // Итераторы
     class VertexIterator {
-        typename std::vector<std::shared_ptr<VertexDesc>>::const_iterator it;
-    public:
-        VertexIterator(decltype(it) iterator) : it(iterator) {}
+        typename std::vector<std::shared_ptr<VertexDesc>>::const_iterator current;
+        typename std::vector<std::shared_ptr<VertexDesc>>::const_iterator end;
 
-        VertexIterator& operator++() { ++it; return *this; }
-        bool operator!=(const VertexIterator& other) const { return it != other.it; }
-        const VertexDesc& operator*() const { return **it; }
+    public:
+        VertexIterator(decltype(current) begin, decltype(current) end)
+            : current(begin), end(end) {}
+
+        // Безопасное разыменование с проверкой
+        const VertexDesc& operator*() const {
+            if (current == end) {
+                throw std::out_of_range("Dereferencing end iterator");
+            }
+            return **current;
+        }
+
+        // Проверка перед инкрементом
+        VertexIterator& operator++() {
+            if (current == end) {
+                throw std::out_of_range("Incrementing end iterator");
+            }
+            ++current;
+            return *this;
+        }
+
+        bool operator!=(const VertexIterator& other) const {
+            return current != other.current;
+        }
+
+        // Дополнительный метод для проверки валидности
+        bool is_valid() const {
+            return current != end;
+        }
     };
 
     class EdgeIterator {
-        typename Structure::EdgeIteratorImpl impl;
+        std::unique_ptr<typename Structure::EdgeIteratorImpl> impl;
+
     public:
         EdgeIterator(std::unique_ptr<typename Structure::EdgeIteratorImpl> it)
             : impl(std::move(it)) {}
 
-        EdgeIterator& operator++() { impl->next(); return *this; }
-        bool operator!=(const EdgeIterator& other) const { return !impl->equals(*other.impl); }
-        const EdgeDesc& operator*() const { return impl->current(); }
+        // Безопасное разыменование
+        const EdgeDesc& operator*() const {
+            return impl->current(); // Будет брошено исключение если невалидно
+        }
+
+        // Доступ к членам
+        const EdgeDesc* operator->() const {
+            return &impl->current();
+        }
+
+        // Префиксный инкремент
+        EdgeIterator& operator++() {
+            impl->next();
+            return *this;
+        }
+
+        // Постфиксный инкремент
+        EdgeIterator operator++(int) {
+            EdgeIterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        // Сравнение
+        bool operator!=(const EdgeIterator& other) const {
+            // Оба итератора end
+            if (!impl && !other.impl) return false;
+
+            // Один из итераторов end
+            if (!impl || !other.impl) return true;
+
+            // Сравнение реализаций
+            return !impl->equals(other.impl.get());
+        }
+
+        // Явная проверка валидности
+        bool is_valid() const {
+            return impl->is_valid();
+        }
+
+        // Безопасное получение ребра
+        bool try_get(EdgeDesc& result) const {
+            if (is_valid()) {
+                result = **this;
+                return true;
+            }
+            return false;
+        }
     };
 
 public:
@@ -228,7 +311,7 @@ public:
 
         // Создание вершин
         for(size_t i = 0; i < vertex_count; ++i) {
-            InsertV();
+            InsertV("name " + std::to_string(i), i);
         }
 
         // Генерация случайных рёбер
@@ -247,8 +330,9 @@ public:
             if(structure->hasEdge(vertices[src], vertices[dest])) continue;
 
             try {
-                InsertE(vertices[src], vertices[dest], weight_dist(gen));
+                auto e = InsertE(vertices[src], vertices[dest], weight_dist(gen));
                 created_edges++;
+                e->SetData("data " + std::to_string(created_edges));
             } catch(const std::exception&) {
                 // Игнорируем ошибки (например, при дубликатах)
             }
@@ -258,7 +342,7 @@ public:
     class OutEdgeIterator {
         std::unique_ptr<typename Structure::OutEdgeIteratorImpl> impl;
     public:
-        explicit OutEdgeIterator(std::unique_ptr<typename Structure::OutEdgeIteratorImpl> it)
+        OutEdgeIterator(std::unique_ptr<typename Structure::OutEdgeIteratorImpl> it)
             : impl(std::move(it)) {}
 
         OutEdgeIterator& operator++() { impl->next(); return *this; }
@@ -267,15 +351,15 @@ public:
     };
 
     // Методы итераторов
-    VertexIterator vertex_begin() const { return VertexIterator(vertices.begin()); }
-    VertexIterator vertex_end() const { return VertexIterator(vertices.end()); }
+    VertexIterator vertex_begin() const { return VertexIterator(vertices.begin(), vertices.end()); }
+    VertexIterator vertex_end() const { return VertexIterator(vertices.end(), vertices.end()); }
 
-    EdgeIterator edge_begin() const {
-        return EdgeIterator(structure->allEdgesIterator());
+    EdgeIterator edges_begin() const {
+        return EdgeIterator(structure->edgesIterator());
     }
 
-    EdgeIterator edge_end() const {
-        return EdgeIterator(structure->allEdgesEndIterator());
+    EdgeIterator edges_end() const {
+        return EdgeIterator(nullptr);
     }
 
     OutEdgeIterator out_edges_begin(std::shared_ptr<VertexDesc> v) const {
@@ -330,6 +414,10 @@ public:
         return vertices[index];
     }
 
+    std::shared_ptr<EdgeDesc> GetEdge(std::shared_ptr<VertexDesc>& v1, std::shared_ptr<VertexDesc>& v2) const {
+        return structure->GetEdge(v1, v2);
+    }
+
 private:
     void printAdjList() const {
         for (const auto& v : getVertices()) {
@@ -365,41 +453,26 @@ private:
         for (size_t i = 0; i < n; ++i) {
             std::cout << i << " | ";
             for (size_t j = 0; j < n; ++j) {
-                auto edge = GetEdge(getVertices()[i], getVertices()[j]);
-                if (edge) {
-                    if (edge->IsWeighted()) {
-                        std::cout << " " << 1 << " ";
+                try {
+                    auto edge = GetEdge(getVertices()[i], getVertices()[j]);
+                    if (edge) {
+                        if (edge->IsWeighted()) {
+                            std::cout << " " << 1 << " ";
+                        } else {
+                            std::cout << " X ";
+                        }
                     } else {
-                        std::cout << " X ";
+                        std::cout << " 0 ";
                     }
-                } else {
+                } catch(const std::exception&) {
                     std::cout << " 0 ";
                 }
             }
             std::cout << std::endl;
         }
     }
+
+    Structure getStructure() {
+        return structure;
+    }
 };
-
-
-
-// пасхалка момент
-// ……………………………....…………._¸„„„„_
-// ……………………....…………...„--~*'¯…….'\
-// ………….…....………………… („-~~--„¸_….,/ì'Ì
-// ……....………….………….¸„-^"¯ : : : : :¸-¯"¯/'
-// ………....……………¸„„-^"¯ : : : : : : : '\¸„„,-"
-// **¯¯¯'^^~-„„„----~^*'"¯ : : : : : : : : : :¸-"
-// .:.:.:.:.„-^" : : : : : : : : : : : : : : : : :„-"
-// :.:.:.:.:.:.:.:.:.:.: : : : : : : : : : ¸„-^¯
-// .::.:.:.:.:.:.:.:. : : : : : : : ¸„„-^¯
-// :.' : : '\ : : : : : : : ;¸„„-~"
-// :.:.:: :"-„""***/*'ì¸'¯
-// :.': : : : :"-„ : : :"\
-// .:.:.: : : : :" : : : : \,
-// :.: : : : : : : : : : : : 'Ì
-// : : : : : : :, : : : : : :/
-// "-„_::::_„-*__„„~"
-
-
-

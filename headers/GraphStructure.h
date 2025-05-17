@@ -38,6 +38,19 @@ public:
         virtual std::unique_ptr<OutEdgeIteratorImpl> clone() const = 0;
     };
 
+    class EdgeIteratorImpl {
+    public:
+        virtual ~EdgeIteratorImpl() = default;
+        virtual void next() = 0;
+        virtual bool equals(const EdgeIteratorImpl* other) const = 0;
+        virtual const EdgeDesc& current() const = 0;
+        virtual bool is_valid() const = 0;
+        virtual std::unique_ptr<EdgeIteratorImpl> clone() const = 0;
+    };
+
+    virtual std::unique_ptr<EdgeIteratorImpl> edgesIterator() const = 0;
+    virtual std::unique_ptr<EdgeIteratorImpl> edgesEndIterator() const = 0;
+
     virtual std::unique_ptr<OutEdgeIteratorImpl> outEdgesIterator(std::shared_ptr<VertexDesc> vertex) const = 0;
     virtual std::unique_ptr<OutEdgeIteratorImpl> outEdgesEndIterator() const = 0;
     virtual std::unique_ptr<GraphStructure> clone() const = 0;
