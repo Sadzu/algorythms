@@ -5,6 +5,8 @@
 #include <limits>
 #include <stdexcept>
 #include <string>
+#include <algorithm>
+#include <memory>
 
 template<typename Graph>
 class ShortestPathTask {
@@ -13,6 +15,7 @@ class ShortestPathTask {
 
     const Graph* graph_ptr = nullptr;
     std::vector<std::vector<int>> distance_matrix;
+    std::vector<std::vector<int>> predecessor_matrix;
     static constexpr int INF = std::numeric_limits<int>::max();
 
 public:
@@ -32,8 +35,32 @@ public:
         Solve();
     }
 
-    const std::vector<std::vector<int>>& Result() const {
+    const std::vector<std::vector<int>>& GetDistances() const {
         return distance_matrix;
+    }
+
+    std::vector<int> GetPath(int start_idx, int end_idx) const {
+        if(start_idx < 0 || end_idx < 0 ||
+           static_cast<size_t>(start_idx) >= distance_matrix.size() ||
+           static_cast<size_t>(end_idx) >= distance_matrix.size()) {
+            throw std::out_of_range("Invalid vertex index");
+        }
+
+        if(distance_matrix[start_idx][end_idx] == -1) {
+            return {};
+        }
+
+        std::vector<int> path;
+        for(int at = end_idx; at != start_idx; at = predecessor_matrix[start_idx][at]) {
+            if(at == -1 || predecessor_matrix[start_idx][at] == -1) {
+                throw std::runtime_error("Path reconstruction failed");
+            }
+            path.push_back(at);
+        }
+        path.push_back(start_idx);
+
+        std::reverse(path.begin(), path.end());
+        return path;
     }
 
 private:
@@ -43,56 +70,57 @@ private:
         }
 
         const size_t V = graph_ptr->V();
-        distance_matrix.clear();
-        distance_matrix.resize(V, std::vector<int>(V, INF));
+        distance_matrix.assign(V, std::vector<int>(V, INF));
+        predecessor_matrix.assign(V, std::vector<int>(V, -1));
 
         for(size_t i = 0; i < V; ++i) {
-            BFS(i, distance_matrix[i]);
+            BFS(i);
+        }
+
+        for(auto& row : distance_matrix) {
+            for(auto& d : row) {
+                if(d == INF) d = -1;
+            }
         }
     }
 
-    void BFS(size_t start_idx, std::vector<int>& distances) {
+    void BFS(size_t start_idx) {
         const size_t num_vertices = graph_ptr->V();
         std::queue<size_t> q;
         q.push(start_idx);
-        distances[start_idx] = 0;
+        distance_matrix[start_idx][start_idx] = 0;
+        predecessor_matrix[start_idx][start_idx] = static_cast<int>(start_idx);
 
         while(!q.empty()) {
             size_t u_idx = q.front();
             q.pop();
 
-            auto u = graph_ptr->vertex_at(u_idx);
-            for(auto it = graph_ptr->out_edges_begin(u); it != graph_ptr->out_edges_end(u); ++it) {
-                try {
-                    const auto& edge = *it;
-                    size_t v_idx;
+            try {
+                auto u = graph_ptr->vertex_at(u_idx);
+
+                // Получаем диапазон исходящих ребер
+                std::vector<EdgeDesc> edges = graph_ptr->out_edges(u);
+
+                for(const auto& edge : edges) {
                     try {
-                        v_idx = edge.v2()->GetId();
+                        size_t v_idx = edge.v2()->GetId();
+
+                        if(v_idx >= num_vertices) {
+                            continue;
+                        }
+
+                        if(distance_matrix[start_idx][v_idx] == INF) {
+                            distance_matrix[start_idx][v_idx] = distance_matrix[start_idx][u_idx] + 1;
+                            predecessor_matrix[start_idx][v_idx] = static_cast<int>(u_idx);
+                            q.push(v_idx);
+                        }
                     } catch(const std::exception& e) {
-                        std::cerr << "Error accessing vertex ID: " << e.what() << std::endl;
                         continue;
                     }
-
-                    if (v_idx >= num_vertices) {
-                        std::cerr << "Warning: Invalid vertex ID " << v_idx
-                                  << " detected in edge. Skipping." << std::endl;
-                        continue;
-                    }
-
-                    if (distances[v_idx] == INF) {
-                        distances[v_idx] = distances[u_idx] + 1;
-                        q.push(v_idx);
-                    }
-                } catch (std::out_of_range &e) {
-                    break;
                 }
-
+            } catch(const std::exception& e) {
+                continue;
             }
-        }
-
-        // Замена INF на -1 для недостижимых вершин
-        for(auto& d : distances) {
-            if(d == INF) d = -1;
         }
     }
 };

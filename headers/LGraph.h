@@ -99,27 +99,46 @@ public:
 
     void removeVertex(std::shared_ptr<VertexDesc> vertex) override {
         const size_t id = vertex->getId();
-        if(id >= adjacency.size()) return;
+        if (id >= adjacency.size()) return;
 
-        // Удаление всех связанных ребер
-        edge_count -= adjacency[id].size();
+        // 1. Удаление всех рёбер, связанных с вершиной
+        // Исходящие рёбра
+        size_t outgoing_edges = adjacency[id].size();
         adjacency[id].clear();
+        edge_count -= outgoing_edges;
 
-        // Удаление ссылок на вершину в других списках
-        for(auto& list : adjacency) {
-            list.remove_if([id](const auto& edge) {
+        // Входящие рёбра
+        size_t incoming_edges = 0;
+        for (size_t i = 0; i < adjacency.size(); ++i) {
+            if (i == id) continue;
+            incoming_edges += std::erase_if(adjacency[i], [id](const auto& edge) {
                 return edge->v2()->getId() == id;
             });
         }
+        edge_count -= incoming_edges;
 
-        // Сдвиг идентификаторов вершин после удаленной
+        // 2. Удаление вершины из списка смежности
         adjacency.erase(adjacency.begin() + id);
-        for(auto& list : adjacency) {
-            for(auto& edge : list) {
-                if(edge->v1()->getId() > id) edge->v1()->SetId(edge->v1()->getId() - 1);
-                if(edge->v2()->getId() > id) edge->v2()->SetId(edge->v2()->getId() - 1);
+
+        // 3. Обновление ID вершин в оставшихся рёбрах
+        for (size_t i = 0; i < adjacency.size(); ++i) {
+            for (auto& edge : adjacency[i]) {
+                auto v1 = edge->v1();
+                auto v2 = edge->v2();
+                if (v1->getId() > id) v1->SetId(v1->getId() - 1);
+                if (v2->getId() > id) v2->SetId(v2->getId() - 1);
             }
         }
+
+        // 4. Проверка целостности графа
+#ifdef DEBUG
+        for (size_t i = 0; i < adjacency.size(); ++i) {
+            for (const auto& edge : adjacency[i]) {
+                assert(edge->v1()->getId() < adjacency.size());
+                assert(edge->v2()->getId() < adjacency.size());
+            }
+        }
+#endif
     }
 
     // Получение информации о графе

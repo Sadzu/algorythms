@@ -158,23 +158,48 @@ public:
     bool DeleteV(std::shared_ptr<VertexDesc> v) {
         try {
             validate_vertex(v);
-        } catch (std::invalid_argument& e) {
+        } catch (const std::invalid_argument& e) {
             return false;
         }
 
-        // Удаляем из name_map
-        if(v->IsNamed())
+        const size_t deleted_id = v->getId();
+
+        // 1. Удаление из name_map
+        if (v->IsNamed()) {
             name_map.erase(v->GetName());
+        }
 
-        // Удаляем из вектора
-        vertices.erase(vertices.begin() + v->GetId());
+        // 2. Удаление вершины из вектора
+        vertices.erase(vertices.begin() + deleted_id);
 
-        // Обновляем индексы
-        for(size_t i = v->GetId(); i < vertices.size(); ++i)
-            vertices[i]->SetId(i);
+        std::cout << "DeleteV" << std::endl;
+        for (auto v : vertices) {
+            std::cout << v->getId() << " ";
+        }
+        std::cout << std::endl;
+        // 3. Обновление ID в оставшихся вершинах
+        for (size_t i = deleted_id; i < vertices.size(); ++i) {
+            vertices[i]->SetId(i); // Важно: обновление до вызова removeVertex!
+        }
+        std::cout << "DeleteV" << std::endl;
+        for (auto v : vertices) {
+            std::cout << v->getId() << " ";
+        }
+        std::cout << std::endl;
 
-        // Удаляем из структуры
+        // 4. Удаление из структуры графа
         structure->removeVertex(v);
+        std::cout << "DeleteV" << std::endl;
+        for (auto v : vertices) {
+            std::cout << v->getId() << " ";
+        }
+        std::cout << std::endl;
+
+        // 5. Обновление name_map для именованных вершин
+        for (size_t i = deleted_id; i < vertices.size(); ++i) {
+            // if (vertices[i]->IsNamed()) {
+            //     name_map[vertices[i]->GetName()] =
+        }
 
         return true;
     }
@@ -311,12 +336,13 @@ public:
 public:
     void GenerateDirectedGraph(size_t vertex_count, size_t edge_count, float min_weight = 1.0f, float max_weight = 10.0f) {
         // Очистка текущего графа
-        structure = std::make_unique<LGraph<VertexDesc, EdgeDesc>>(vertex_count, true);
+        structure = std::make_unique<LGraph<VertexDesc, EdgeDesc>>(0, true);
         vertices.clear();
         name_map.clear();
 
         // Создание вершин
         for(size_t i = 0; i < vertex_count; ++i) {
+            std::cout << structure->vertexCount() << " vertices, " << structure->edgeCount() << " edges\n";
             InsertV("name " + std::to_string(i), i);
         }
 
@@ -343,6 +369,16 @@ public:
                 // Игнорируем ошибки (например, при дубликатах)
             }
         }
+    }
+
+    std::vector<EdgeDesc> out_edges(const std::shared_ptr<VertexDesc>& v) const {
+        std::vector<EdgeDesc> result;
+        for(const auto& e : structure->getOutEdges(v)) {
+            if(e->v1() == v) {
+                result.push_back(*e);
+            }
+        }
+        return result;
     }
 
     class OutEdgeIterator {

@@ -49,6 +49,10 @@ public:
         return source && source->IsValid() && target && target->IsValid();
     }
 
+    std::pair<size_t, size_t> getFromTo() const {
+        return std::make_pair(source->GetId(), target->GetId());
+    }
+
     // Операторы сравнения
     bool operator==(const EdgeDescriptor& other) const noexcept {
         return source == other.source && target == other.target;

@@ -104,7 +104,16 @@ template<typename Graph>
 void HandleShortestPath(Graph& graph) {
     try {
         ShortestPathTask<Graph> task(&graph);
-        PrintMatrix(task.Result());
+        int source, target;
+        cout << "Enter source id: ";
+        cin >> source;
+        cout << "Enter target id: ";
+        cin >> target;
+        vector<int> path = task.GetPath(source, target);
+        for (size_t i = 0; i < path.size(); ++i) {
+            cout << path[i] << " ";
+        }
+        cout << endl;
     } catch(const exception& e) {
         cerr << "Exception: " << e.what() << endl;
     }
@@ -143,8 +152,16 @@ void HandleRemoveVertex(Graph& graph) {
     cin >> id;
 
     try {
+        bool flag = false;
+        if (!graph.Dense()) {
+            flag = true;
+        }
+        graph.ToMatrixGraph();
         auto vertex = graph.getVertices().at(id);
         cout << graph.DeleteV(vertex) << endl;
+        if (flag) {
+            graph.ToListGraph();
+        }
     } catch(const exception& e) {
         cerr << "Exception: " << e.what() << endl;
     }
@@ -375,7 +392,7 @@ int main() {
                     ++edgeIterator;
                     break;
                 case 35:
-                    cout << edgeIterator.operator*().GetData() << endl;
+                    cout << edgeIterator.operator*().getFromTo().first << " " << edgeIterator.operator*().getFromTo().second << endl;
                     break;
                 case 36:
                     try {
