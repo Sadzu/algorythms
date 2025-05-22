@@ -71,7 +71,7 @@ void test_hash_quality(int requested_capacity, int key_count) {
 void testHashTableOpenMode(int N, double ALPHA) {
     HashTable<string, int>* table = new HashTable<string, int>(N);
     int capacity = table->getCapacity();
-    int K = capacity * ALPHA;
+    int K = capacity * 20;
 
     cout << "Created table with capacity: " << capacity << '\n';
     cout << "Created table with size: " << K << '\n';
@@ -130,7 +130,7 @@ void testHashTableOpenMode(int N, double ALPHA) {
     cout << "Number of elements after testing: " << table->getSize() << endl;
     cout << "Final load factor: " << double(table->getSize()) / table->getCapacity() << endl;
 
-    cout << "  Insert theory:    " << 0.1*((1.0 / ALPHA) * log(1.0 / (1.0 - ALPHA))) + 0.9*(1.0 / (1.0 - ALPHA)) << endl;
+    cout << "  Insert theory:    " << 0.9*((1.0 / ALPHA) * log(1.0 / (1.0 - ALPHA))) + 0.1*(1.0 / ((1.0 - ALPHA) * log)) << endl;
     cout << "Insert average cost: " << double(insertCounter) / operationsCount << '\n';
 
     cout << "  Delete theory:    " << 0.1*((1.0 / ALPHA) * log(1.0 / (1.0 - ALPHA))) + 0.9*(1.0 / (1.0 - ALPHA)) << endl;

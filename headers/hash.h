@@ -176,6 +176,7 @@ int HashTable<Key, Data>::hash(Key key) {
     std::string str = keyToString(key); // преобразуем ключ в строку
     lastKey = key;                      // сохраняем исходный ключ
     lastHashKey = stringToInt(str);     // преобразуем строку в число
+    lastIndex = static_cast<int>(lastHashKey % capacity);
     return static_cast<int>(lastHashKey % capacity);
 }
 
@@ -225,7 +226,7 @@ bool HashTable<Key, Data>::insertData(Key key, Data data) {
     dataArray[pos] = data;
     stateArray[pos] = BUSY;
     size++;
-    lastIndex = pos;
+    //lastIndex = pos;
     return true;
 }
 

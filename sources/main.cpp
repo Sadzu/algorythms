@@ -27,6 +27,7 @@ void printMenu() {
     cout << "\t13) == end() ?" << endl;
     cout << "\t14) Get value of current" << endl;
     cout << "\t15) Set value of current" << endl;
+    cout << "\t16) Run benchmark" << endl;
 
     cout << "99) Exit" << endl;
 }
