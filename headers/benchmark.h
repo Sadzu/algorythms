@@ -130,13 +130,13 @@ void testHashTableOpenMode(int N, double ALPHA) {
     cout << "Number of elements after testing: " << table->getSize() << endl;
     cout << "Final load factor: " << double(table->getSize()) / table->getCapacity() << endl;
 
-    cout << "  Insert theory:    " << 0.9*((1.0 / ALPHA) * log(1.0 / (1.0 - ALPHA))) + 0.1*(1.0 / ((1.0 - ALPHA) * log)) << endl;
+    cout << "  Insert theory:    " << 0.1*((1.0 / 2.0) * (1.0 + 1.0 * (1.0 / (1.0 - ALPHA))) ) + 0.9*((1.0 / 2.0) * (1.0 + 1.0 * ((1.0 / (1.0 - ALPHA)) * (1.0 / (1.0 - ALPHA)))) ) << endl;
     cout << "Insert average cost: " << double(insertCounter) / operationsCount << '\n';
 
-    cout << "  Delete theory:    " << 0.1*((1.0 / ALPHA) * log(1.0 / (1.0 - ALPHA))) + 0.9*(1.0 / (1.0 - ALPHA)) << endl;
+    cout << "  Delete theory:    " << 0.9*((1.0 / 2.0) * (1.0 + 1.0 * (1.0 / (1.0 - ALPHA))) ) + 0.1*((1.0 / 2.0) * (1.0 + 1.0 * ((1.0 / (1.0 - ALPHA)) * (1.0 / (1.0 - ALPHA)))) ) << endl;
     cout << "Delete average cost: " << double(deleteCounter) / operationsCount << '\n';
 
-    cout << "  Search theory:    " << 0.9*((1.0 / ALPHA) * log(1.0 / (1.0 - ALPHA))) + 0.1*(1.0 / (1.0 - ALPHA)) << endl;
+    cout << "  Search theory:    " << 0.9*((1.0 / 2.0) * (1.0 + 1.0 * (1.0 / (1.0 - ALPHA))) ) + 0.1*((1.0 / 2.0) * (1.0 + 1.0 * ((1.0 / (1.0 - ALPHA)) * (1.0 / (1.0 - ALPHA)))) ) << endl;
     cout << "Search average cost: " << double(findCounter) / operationsCount << '\n';
 
     delete table;
